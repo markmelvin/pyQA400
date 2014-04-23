@@ -20,10 +20,6 @@ private:
 	static QA400Interface^ analyzer;
 };
 
-//inline
-//void PointFArrayFromPointFVector(PointFVector vect, System::Drawing::PointF *pointfarray){
-//
-//}
 
 //////////////////////////////////////////////////
 // String Conversion Functions

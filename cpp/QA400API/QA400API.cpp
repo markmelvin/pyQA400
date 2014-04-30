@@ -31,9 +31,37 @@ void QA400API::RunSingle()
 	QA400Application::getAnalyzer()->RunSingle();
 }
 
+void QA400API::RunSingle(double ampl1, double freq1)
+{
+	QA400Application::getAnalyzer()->RunSingle(ampl1, freq1);
+}
+
+void QA400API::RunSingleFR(double ampl)
+{
+	QA400Application::getAnalyzer()->RunSingleFR(ampl);
+}
+
 QA400API::AcquisitionState QA400API::GetAcquisitionState()
 {
 	return (QA400API::AcquisitionState) QA400Application::getAnalyzer()->GetAcquisitionState();
+}
+
+double QA400API::ComputePowerDBOnLastData(ChannelType channel)
+{
+	array<System::Drawing::PointF>^ data = QA400Application::getAnalyzer()->GetData((Com::QuantAsylum::QA400::ChannelType) channel);
+	return QA400Application::getAnalyzer()->ComputePowerDB(data);
+}
+
+double QA400API::ComputePowerDBOnLastData(ChannelType channel, double startFreq, double endFreq)
+{
+	array<System::Drawing::PointF>^ data = QA400Application::getAnalyzer()->GetData((Com::QuantAsylum::QA400::ChannelType) channel);
+	return QA400Application::getAnalyzer()->ComputePowerDB(data, startFreq, endFreq);
+}
+
+double QA400API::ComputePeakPowerDBOnLastData(ChannelType channel)
+{
+	array<System::Drawing::PointF>^ data = QA400Application::getAnalyzer()->GetData((Com::QuantAsylum::QA400::ChannelType) channel);
+	return QA400Application::getAnalyzer()->ComputePeakPowerDB(data);
 }
 
 double QA400API::ComputeTHDNPctOnLastData(ChannelType channel, double fundamental, double minFreq, double maxFreq)

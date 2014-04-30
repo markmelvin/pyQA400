@@ -12,8 +12,8 @@ IF "%1"=="clean" (
 
     REM TODO - Make this go away
     @echo Copying dependencies...
-    copy "C:\Users\ffwxyx\Documents\Visual Studio 2013\Projects\QA400API\Debug\QA400API.dll" .
-    copy "C:\Users\ffwxyx\Documents\Visual Studio 2013\Projects\QA400API\Debug\QA400API.lib" .
+    copy "..\cpp\Debug\QA400API.dll" .
+    copy "..\cpp\Debug\QA400API.lib" .
 
     C:\python27\python setup.py build_ext --inplace
 )

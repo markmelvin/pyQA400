@@ -213,3 +213,8 @@ pip-log.txt
 
 #Mr Developer
 .mr.developer.cfg
+python/pyQA400.cpp
+python/pyQA400.pyd
+python/QA400API.dll
+python/QA400API.h
+python/QA400API.lib

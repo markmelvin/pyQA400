@@ -123,20 +123,23 @@ public:
 	/// <summary>
 	/// Given a previous data acquisition, this will compute the power of the data from the last acquisition.
 	/// </summary>
+	/// <param name="channel">The channel to read the last data from.</param>
 	/// <returns>Computed power in dB</returns>
-	static double ComputePowerDBOnLastData();
+	static double ComputePowerDBOnLastData(ChannelType channel);
 
 	/// <summary>
 	/// Given a previous data acquisition, this will compute the power of the data from the last acquisition.
 	/// </summary>
+	/// <param name="channel">The channel to read the last data from.</param>
 	/// <returns>Computed power in dB</returns>
-	static double ComputePowerDBOnLastData(double startFreq, double endFreq);
+	static double ComputePowerDBOnLastData(ChannelType channel, double startFreq, double endFreq);
 
 	/// <summary>
 	/// Finds the peak and computes the power in presently selected units on the data from the last acquisition.
 	/// </summary>
-	/// <returns></returns>
-	static double ComputePeakPowerDBOnLastData();
+	/// <param name="channel">The channel to read the last data from.</param>
+	/// <returns>Computed peak power in dB</returns>
+	static double ComputePeakPowerDBOnLastData(ChannelType channel);
 
 	/// <summary>
 	/// Given a previous data acquisition, this will compute the THD of the data from the last acquisition. The fundamental parameter specifies the target

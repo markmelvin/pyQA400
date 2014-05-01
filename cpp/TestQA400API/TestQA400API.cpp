@@ -3,7 +3,7 @@
 
 #include "stdafx.h"
 #include <stdlib.h>
-#include "..\QA400API\QA400API.h"
+#include "QA400API.h"
 
 int _tmain(int argc, _TCHAR* argv[])
 {

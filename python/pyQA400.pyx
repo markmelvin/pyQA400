@@ -32,8 +32,8 @@ def get_acquisition_state():
 def is_connected():
     return IsConnected()
 
-#def set_to_default(filename=""):
-#    return SetToDefault(filename)
+def set_to_default(filename=""):
+    return SetToDefault(filename)
 
 def set_generator(generator, turn_on, amplitude_dbfs, frequency):
     SetGenerator(generator, turn_on, amplitude_dbfs, frequency)

@@ -6,7 +6,7 @@
 #define EXPORT_SPEC __declspec( dllexport )
 #else
 #define EXPORT_SPEC __declspec( dllimport )
-#pragma comment (lib, "../Debug/QA400API.lib")
+#pragma comment (lib, "QA400API.lib")
 #endif
 
 struct EXPORT_SPEC PointF
@@ -60,7 +60,7 @@ public:
 	/// internal default is used. Otherwise, the indicated settings file is loaded. If indicated file name was successfully loaded, then true 
 	/// is returned. If the filename is empty then true is always returned and default is always loaded. 
 	/// </summary>
-	bool SetToDefault(const char *fileName);
+	static bool SetToDefault(const char *fileName);
 
 	/// <summary>
 	/// This is the same as pressing the RUN button on the front panel when the analyzer is stopped.
@@ -68,7 +68,7 @@ public:
 	static void Run();
 
 	/// <summary>
-	/// This is the same as pressing the RUN button on the front panel when the analyzer is running.
+	/// This is the same as pressing the STOP button on the front panel when the analyzer is running.
 	/// </summary>
 	static void Stop();
 
@@ -92,7 +92,7 @@ public:
 	static void RunSingle();
 
 	/// <summary>
-	/// Performs a singe frequency response sweep.
+	/// Performs a single frequency response sweep.
 	/// </summary>
 	/// <param name="ampl"></param>
 	static void RunSingleFR(double ampl);
@@ -131,6 +131,8 @@ public:
 	/// Given a previous data acquisition, this will compute the power of the data from the last acquisition.
 	/// </summary>
 	/// <param name="channel">The channel to read the last data from.</param>
+	/// <param name="startFreq">The starting frequency.</param>
+	/// <param name="endFreq">The ending frequency.</param>
 	/// <returns>Computed power in dB</returns>
 	static double ComputePowerDBOnLastData(ChannelType channel, double startFreq, double endFreq);
 
@@ -138,7 +140,7 @@ public:
 	/// Finds the peak and computes the power in presently selected units on the data from the last acquisition.
 	/// </summary>
 	/// <param name="channel">The channel to read the last data from.</param>
-	/// <returns>Computed peak power in dB</returns>
+	/// <returns>Computed power in dB</returns>
 	static double ComputePeakPowerDBOnLastData(ChannelType channel);
 
 	/// <summary>
@@ -157,8 +159,8 @@ public:
 	/// </summary>
 	/// <param name="channel">The channel to read the last data from.</param>
 	/// <param name="fundamental">The desired fundamental frequency. The level at this frequency will be suppressed in the calculation, while harmonics of this frequency will be used to determine the THD</param>
+	/// <param name="minFreq">Determines the min frequency for the noise calculation</param>
 	/// <param name="maxFreq">Determines the max frequency that will be used for the noise and THD computation</param>
-	/// <param name="minFreq">Determines the min freuqency for the noise calculation</param>
 	/// <returns>THD level in %</returns>
 	static double ComputeTHDNPctOnLastData(ChannelType channel, double fundamental, double minFreq, double maxFreq);
 
@@ -167,9 +169,9 @@ public:
 	/// </summary>
 	/// <param name="gen">Generator 1 or 2</param>
 	/// <param name="isOn">Sets on/off state</param>
-	/// <param name="amp">Sets amplitude</param>
+	/// <param name="ampl">Sets amplitude</param>
 	/// <param name="freq">Sets frequency. This might be rounded, depending on the host settings</param>
-	static void SetGenerator(GenType gen, bool isOn, double amp, double freq);
+	static void SetGenerator(GenType gen, bool isOn, double ampl, double freq);
 
 	/// <summary>
 	/// Sets the input and output offsets used in all calculations.
@@ -181,14 +183,14 @@ public:
 	/// <summary>
 	/// Sets the units for data
 	/// </summary>
-	/// <param name="type"></param>
+	/// <param name="type">The units type to use</param>
 	static void SetUnits(UnitsType type);
 
 	/// <summary>
 	/// Sets the length of the in and out sample buffers. The buffer length must be a power of 2 and must be a supported buffer
 	/// length. If not a power of two, it will be rounded up to the next power of 2. 
 	/// </summary>
-	/// <param name="samples"></param>
+	/// <param name="samples">Buffer length (in number of samples)</param>
 	static void SetBufferLength(unsigned int samples);
 
 	// Below are factory test interfaces. Do not call these. 

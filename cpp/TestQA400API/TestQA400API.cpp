@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include <stdlib.h>
 #include "QA400API.h"
+#include <Windows.h> // For Sleep()
 
 int _tmain(int argc, _TCHAR* argv[])
 {
@@ -15,10 +16,14 @@ int _tmain(int argc, _TCHAR* argv[])
 		delete [] pName;
 	}
 	printf("IsConnected?: %s\n", QA400API::IsConnected() ? "TRUE" : "FALSE");
-	printf("Channel type right out: %d\n", QA400API::ChannelType::LeftOut);
+	printf("Channel type left out: %d\n", QA400API::ChannelType::LeftOut);
 
 	printf("Calculating THD percent... ");
-	QA400API::SetGenerator(QA400API::Gen2, true, -10, 1000);
+	QA400API::SetGenerator(QA400API::Gen1, false, -10, 1000);
+	QA400API::SetGenerator(QA400API::Gen2, false, -10, 1000);
+	Sleep(500);
+	QA400API::SetGenerator(QA400API::Gen1, true, -10, 1000);
+	Sleep(500);
 	QA400API::RunSingle();
 	while (QA400API::GetAcquisitionState() == QA400API::AcquisitionState::Busy)
 		;
@@ -33,13 +38,13 @@ int _tmain(int argc, _TCHAR* argv[])
 	printf("%f%%\n", thdpct1);
 	double thdpct2 = QA400API::ComputeTHDPct(&data, 1000, 20000);
 	printf("%f%%\n", thdpct2);
-	double pwr = QA400API::ComputePeakPowerDB(&data);
+	double pwr = QA400API::ComputePowerDB(&data);
+	printf("%fdB\n", pwr);
+	pwr = QA400API::ComputePeakPowerDB(&data);
 	printf("%fdB\n", pwr);
 
 	free(data.values);
 
-	//QA400API::Run();
-	//QA400API::Stop();
 	return 0;
 }
 

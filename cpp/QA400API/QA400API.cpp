@@ -10,6 +10,7 @@ QA400Interface^ QA400Application::getAnalyzer()
 	if (!QA400Application::analyzer)
 	{
 		QA400API::LaunchApplicationIfNotRunning();
+		Thread::Sleep(2000);
 		analyzer = (QA400Interface^) QAConnectionManager::ConnectTo(QAConnectionManager::Devices::QA400);
 	}
 	return analyzer;

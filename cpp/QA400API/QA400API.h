@@ -104,21 +104,41 @@ public:
 	static AcquisitionState GetAcquisitionState();
 
 	/// <summary>
-	/// Retrieves the last collected data. If this is called while the analyzer is busy, the result is undefined. The returned data is a PointF
+	/// Retrieves the number of elements in the last collected data.
+	/// </summary>
+	/// <param name="channel"></param>
+	/// <returns></returns>
+	static unsigned int GetLastDataLength(ChannelType channel);
+
+	/// <summary>
+	/// Retrieves the last collected data and returns it in the passed PointFVector (assumes the vector
+	/// has already allocated enough memory for the data - see GetLastDataLength).
+	/// If this is called while the analyzer is busy, the result is undefined. The returned data is a PointF
 	/// array of spectrum data, and each point contains the data amplitude (expressed linearly, and referenced to full scale) and data 
 	/// frequency. Typically, you will want to convert this data into dB.
 	/// </summary>
 	/// <param name="channel"></param>
+	/// <param name="data"></param>
 	/// <returns></returns>
-	static PointFVector GetData(ChannelType channel);
+	static void GetData(ChannelType channel, PointFVector *data);
 
 	/// <summary>
-	/// Retrieves the last collected time-domain data. If this is called while the analyzer is busy, the result is undefined. The returned data is a PointF
-	/// array of time data, and each point contains the data amplitude (y value, ranging from -1 to 1) and time 
+	/// Retrieves the number of elements in the last collected time-domain data.
 	/// </summary>
 	/// <param name="channel"></param>
 	/// <returns></returns>
-	static PointFVector GetTimeData(ChannelType channel);
+	static unsigned int GetLastTimeDataLength(ChannelType channel);
+
+	/// <summary>
+	/// Retrieves the last collected time-domain data. and returns it in the passed PointFVector (assumes the vector
+	/// has already allocated enough memory for the data - see GetLastTimeDataLength).
+	/// If this is called while the analyzer is busy, the result is undefined. The returned data is a PointF
+	/// array of time data, and each point contains the data amplitude (y value, ranging from -1 to 1) and time 
+	/// </summary>
+	/// <param name="channel"></param>
+	/// <param name="data"></param>
+	/// <returns></returns>
+	static void GetTimeData(ChannelType channel, PointFVector *data);
 
 	/// <summary>
 	/// Given a previous data acquisition, this will compute the power of the data from the last acquisition.
@@ -126,6 +146,13 @@ public:
 	/// <param name="channel">The channel to read the last data from.</param>
 	/// <returns>Computed power in dB</returns>
 	static double ComputePowerDBOnLastData(ChannelType channel);
+
+	/// <summary>
+	/// Compute the power of the data.
+	/// </summary>
+	/// <param name="data"></param>
+	/// <returns>Computed power in dB</returns>
+	static double ComputePowerDB(PointFVector *data);
 
 	/// <summary>
 	/// Given a previous data acquisition, this will compute the power of the data from the last acquisition.
@@ -137,11 +164,27 @@ public:
 	static double ComputePowerDBOnLastData(ChannelType channel, double startFreq, double endFreq);
 
 	/// <summary>
+	/// Compute the power of the data.
+	/// </summary>
+	/// <param name="data"></param>
+	/// <param name="startFreq">The starting frequency.</param>
+	/// <param name="endFreq">The ending frequency.</param>
+	/// <returns>Computed power in dB</returns>
+	static double ComputePowerDB(PointFVector *data, double startFreq, double endFreq);
+
+	/// <summary>
 	/// Finds the peak and computes the power in presently selected units on the data from the last acquisition.
 	/// </summary>
 	/// <param name="channel">The channel to read the last data from.</param>
 	/// <returns>Computed power in dB</returns>
 	static double ComputePeakPowerDBOnLastData(ChannelType channel);
+
+	/// <summary>
+	/// Find the peak and computes the power in presently selected units on the data.
+	/// </summary>
+	/// <param name="data"></param>
+	/// <returns>Computed power in dB</returns>
+	static double ComputePeakPowerDB(PointFVector *data);
 
 	/// <summary>
 	/// Given a previous data acquisition, this will compute the THD of the data from the last acquisition. The fundamental parameter specifies the target
@@ -153,6 +196,16 @@ public:
 	/// <returns>THD level in %</returns>
 	static double ComputeTHDPctOnLastData(ChannelType channel, double fundamental, double maxFreq);
 
+	/// <summary>
+	/// Compute the THD of the data. The fundamental parameter specifies the target
+	/// fundamental, and the max frequency specifies the upper harmonic (in Hertz) that will be considered. 
+	/// </summary>
+	/// <param name="data">The data to compute the THD percent on.</param>
+	/// <param name="fundamental">The desired fundamental frequency. The level at this frequency will be suppressed in the calculation, while harmonics of this frequency will be used to determine the THD</param>
+	/// <param name="maxFreq">Determines the max frequency that will be used for the THD computation</param>
+	/// <returns>THD level in %</returns>
+	static double ComputeTHDPct(PointFVector *data, double fundamental, double maxFreq);
+
 	/// Given a previous data acquisition, this will compute the THDN of the data from the last acquisition. The fundamental parameter specifies the target
 	/// fundamental, and the max frequency specifies the upper harmonic (in Hertz) that will be considered. As this also contains a noise calculation, the lower frequency bound must also be specified. It is expected
 	/// that the minFreq < fundamental < maxFreq
@@ -161,8 +214,19 @@ public:
 	/// <param name="fundamental">The desired fundamental frequency. The level at this frequency will be suppressed in the calculation, while harmonics of this frequency will be used to determine the THD</param>
 	/// <param name="minFreq">Determines the min frequency for the noise calculation</param>
 	/// <param name="maxFreq">Determines the max frequency that will be used for the noise and THD computation</param>
-	/// <returns>THD level in %</returns>
+	/// <returns>THDN level in %</returns>
 	static double ComputeTHDNPctOnLastData(ChannelType channel, double fundamental, double minFreq, double maxFreq);
+
+	/// <summary>
+	/// Compute the THDN of the data. The fundamental parameter specifies the target
+	/// fundamental, and the max frequency specifies the upper harmonic (in Hertz) that will be considered. 
+	/// </summary>
+	/// <param name="data">The data to compute the THD percent on.</param>
+	/// <param name="fundamental">The desired fundamental frequency. The level at this frequency will be suppressed in the calculation, while harmonics of this frequency will be used to determine the THD</param>
+	/// <param name="minFreq">Determines the min frequency for the noise calculation</param>
+	/// <param name="maxFreq">Determines the max frequency that will be used for the noise and THD computation</param>
+	/// <returns>THDN level in %</returns>
+	static double ComputeTHDNPct(PointFVector *data, double fundamental, double minFreq, double maxFreq);
 
 	/// <summary>
 	/// Sets the generator to the specified amplitude and frequency. The current units are used. 

@@ -15,7 +15,7 @@ int _tmain(int argc, _TCHAR* argv[])
 		delete [] pName;
 	}
 	printf("IsConnected?: %s\n", QA400API::IsConnected() ? "TRUE" : "FALSE");
-	printf("Channel type right out: %d\n", QA400API::ChannelType::RightOut);
+	printf("Channel type right out: %d\n", QA400API::ChannelType::LeftOut);
 
 	printf("Calculating THD percent... ");
 	QA400API::SetGenerator(QA400API::Gen2, true, -10, 1000);
@@ -23,9 +23,20 @@ int _tmain(int argc, _TCHAR* argv[])
 	while (QA400API::GetAcquisitionState() == QA400API::AcquisitionState::Busy)
 		;
 
+	PointFVector data;
+	data.length = QA400API::GetLastDataLength(QA400API::ChannelType::LeftIn);
+	data.values = (PointF *) malloc(sizeof(PointF) * data.length);
+	QA400API::GetData(QA400API::ChannelType::LeftIn, &data);
+
 	// Compute THD assuming 1 KHz signal and look at harmonics up to 20KHz
-	double thdpct = QA400API::ComputeTHDPctOnLastData(QA400API::ChannelType::RightIn, 1000, 20000);
-	printf("%f%%\n", thdpct);
+	double thdpct1 = QA400API::ComputeTHDPctOnLastData(QA400API::ChannelType::LeftIn, 1000, 20000);
+	printf("%f%%\n", thdpct1);
+	double thdpct2 = QA400API::ComputeTHDPct(&data, 1000, 20000);
+	printf("%f%%\n", thdpct2);
+	double pwr = QA400API::ComputePeakPowerDB(&data);
+	printf("%fdB\n", pwr);
+
+	free(data.values);
 
 	//QA400API::Run();
 	//QA400API::Stop();

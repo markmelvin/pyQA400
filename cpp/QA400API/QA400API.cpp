@@ -87,10 +87,63 @@ QA400API::AcquisitionState QA400API::GetAcquisitionState()
 }
 
 /// ----------------------------------------------------------------
+unsigned int QA400API::GetLastDataLength(ChannelType channel)
+{
+	array<System::Drawing::PointF>^ data = QA400Application::getAnalyzer()->GetData((Com::QuantAsylum::QA400::ChannelType) channel);
+	return data->Length;
+}
+
+/// ----------------------------------------------------------------
+unsigned int QA400API::GetLastTimeDataLength(ChannelType channel)
+{
+	array<System::Drawing::PointF>^ data = QA400Application::getAnalyzer()->GetTimeData((Com::QuantAsylum::QA400::ChannelType) channel);
+	return data->Length;
+}
+
+/// ----------------------------------------------------------------
+void QA400API::GetData(ChannelType channel, PointFVector *data)
+{
+	PointF *curPt = data->values;
+	array<System::Drawing::PointF>^ _data = QA400Application::getAnalyzer()->GetData((Com::QuantAsylum::QA400::ChannelType) channel);
+	for each (System::Drawing::PointF p in _data)
+	{
+		curPt->x = p.X;
+		curPt->y = p.Y;
+		curPt++;
+	}
+}
+
+/// ----------------------------------------------------------------
+void QA400API::GetTimeData(ChannelType channel, PointFVector *data)
+{
+	PointF *curPt = data->values;
+	array<System::Drawing::PointF>^ _data = QA400Application::getAnalyzer()->GetTimeData((Com::QuantAsylum::QA400::ChannelType) channel);
+	for each (System::Drawing::PointF p in _data)
+	{
+		curPt->x = p.X;
+		curPt->y = p.Y;
+		curPt++;
+	}
+}
+
+/// ----------------------------------------------------------------
 double QA400API::ComputePowerDBOnLastData(ChannelType channel)
 {
 	array<System::Drawing::PointF>^ data = QA400Application::getAnalyzer()->GetData((Com::QuantAsylum::QA400::ChannelType) channel);
 	return QA400Application::getAnalyzer()->ComputePowerDB(data);
+}
+
+/// ----------------------------------------------------------------
+double QA400API::ComputePowerDB(PointFVector *data)
+{
+	PointF *curPt = data->values;
+	array<System::Drawing::PointF>^ _data = gcnew array<System::Drawing::PointF>(data->length);
+	for (size_t i = 0; i < data->length; i++)
+	{
+		_data[i] = System::Drawing::PointF(curPt->x, curPt->y);
+		curPt++;
+	}
+	return QA400Application::getAnalyzer()->ComputePowerDB(_data);
 }
 
 /// ----------------------------------------------------------------
@@ -101,10 +154,56 @@ double QA400API::ComputePowerDBOnLastData(ChannelType channel, double startFreq,
 }
 
 /// ----------------------------------------------------------------
+double QA400API::ComputePowerDB(PointFVector *data, double startFreq, double endFreq)
+{
+	PointF *curPt = data->values;
+	array<System::Drawing::PointF>^ _data = gcnew array<System::Drawing::PointF>(data->length);
+	for (size_t i = 0; i < data->length; i++)
+	{
+		_data[i] = System::Drawing::PointF(curPt->x, curPt->y);
+		curPt++;
+	}
+	return QA400Application::getAnalyzer()->ComputePowerDB(_data, startFreq, endFreq);
+}
+
+/// ----------------------------------------------------------------
 double QA400API::ComputePeakPowerDBOnLastData(ChannelType channel)
 {
 	array<System::Drawing::PointF>^ data = QA400Application::getAnalyzer()->GetData((Com::QuantAsylum::QA400::ChannelType) channel);
 	return QA400Application::getAnalyzer()->ComputePeakPowerDB(data);
+}
+
+/// ----------------------------------------------------------------
+double QA400API::ComputePeakPowerDB(PointFVector *data)
+{
+	PointF *curPt = data->values;
+	array<System::Drawing::PointF>^ _data = gcnew array<System::Drawing::PointF>(data->length);
+	for (size_t i = 0; i < data->length; i++)
+	{
+		_data[i] = System::Drawing::PointF(curPt->x, curPt->y);
+		curPt++;
+	}
+	return QA400Application::getAnalyzer()->ComputePeakPowerDB(_data);
+}
+
+/// ----------------------------------------------------------------
+double QA400API::ComputeTHDPctOnLastData(ChannelType channel, double fundamental, double maxFreq)
+{
+	array<System::Drawing::PointF>^ data = QA400Application::getAnalyzer()->GetData((Com::QuantAsylum::QA400::ChannelType) channel);
+	return QA400Application::getAnalyzer()->ComputeTHDPct(data, fundamental, maxFreq);
+}
+
+/// ----------------------------------------------------------------
+double QA400API::ComputeTHDPct(PointFVector *data, double fundamental, double maxFreq)
+{
+	PointF *curPt = data->values;
+	array<System::Drawing::PointF>^ _data = gcnew array<System::Drawing::PointF>(data->length);
+	for (size_t i = 0; i < data->length; i++)
+	{
+		_data[i] = System::Drawing::PointF(curPt->x, curPt->y);
+		curPt++;
+	}
+	return QA400Application::getAnalyzer()->ComputeTHDPct(_data, fundamental, maxFreq);
 }
 
 /// ----------------------------------------------------------------
@@ -115,10 +214,16 @@ double QA400API::ComputeTHDNPctOnLastData(ChannelType channel, double fundamenta
 }
 
 /// ----------------------------------------------------------------
-double QA400API::ComputeTHDPctOnLastData(ChannelType channel, double fundamental, double maxFreq)
+double QA400API::ComputeTHDNPct(PointFVector *data, double fundamental, double minFreq, double maxFreq)
 {
-	array<System::Drawing::PointF>^ data = QA400Application::getAnalyzer()->GetData((Com::QuantAsylum::QA400::ChannelType) channel);
-	return QA400Application::getAnalyzer()->ComputeTHDPct(data, fundamental, maxFreq);
+	PointF *curPt = data->values;
+	array<System::Drawing::PointF>^ _data = gcnew array<System::Drawing::PointF>(data->length);
+	for (size_t i = 0; i < data->length; i++)
+	{
+		_data[i] = System::Drawing::PointF(curPt->x, curPt->y);
+		curPt++;
+	}
+	return QA400Application::getAnalyzer()->ComputeTHDNPct(_data, fundamental, minFreq, maxFreq);
 }
 
 /// ----------------------------------------------------------------

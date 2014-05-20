@@ -23,16 +23,38 @@ DBV         = pyQA400.dBV
 GEN1        = pyQA400.Gen1
 GEN2        = pyQA400.Gen2
 
-# API functions
+# --------------------------------------------------------------------------
+# Utility functions
+# --------------------------------------------------------------------------
+def connect_to_analyzer(timeout=10.0):
+    """Launches the QA400 software and connects to the analyzer. Returns
+       True on success, or false if the operation times out.
+       
+       timeout - The number of seconds to wait for the device to connect."""
+    inittime = time.clock()
+    while not is_connected():
+        if time.clock() > timeout:
+            return False
+        time.sleep(0.2)
+    return True
 
+# --------------------------------------------------------------------------
+# API functions
+# --------------------------------------------------------------------------
 def launch_application_if_not_running():
+    """Launches the QA400 application if it is not already running."""
     LaunchApplicationIfNotRunning()
 
 def get_name():
+    """Returns the friendly name of the host hardware. 
+	   In the case of the QA400, this will be 'QuantAsylum QA400 Audio
+       Analyzer' (without quotes).  This function will succeed whether 
+       or not the hardware is attached to the PC, but the QA400
+       application must be running for this to succeed."""
     cdef char* c_string
     cdef bytes py_string
     namelen = GetNameLength()
-    c_string = <char*> PyMem_Malloc(namelen * sizeof(char))
+    c_string = <char*> PyMem_Malloc((namelen + 1)* sizeof(char))
     if not c_string:
         raise MemoryError("Failed to allocate memory")
     try:
@@ -42,33 +64,93 @@ def get_name():
         PyMem_Free(c_string)
 
 def is_connected():
+    """Returns true if the hardware is connected and functioning. It is
+       recommended that you call this as the first thing you do, as it will
+       automatically launch the application and initialize the analyzer.
+       If this returns false, do not attempt to use the analyzer.
+	   You may need to unplug the USB cable and plug it back in again
+       before retrying.  It is also recommended that you wait a couple
+       seconds for the application to initialize if this is the first
+       time you have connected (and the program just launched)."""
     return IsConnected()
 
 def set_to_default(filename=""):
+    """Sets the analyzer to a known default state. If fileName is an empty
+       string, then the internal default is used. Otherwise, the indicated
+       settings file is loaded. If indicated file name was successfully
+       loaded, then true is returned. If the filename is empty then true
+       is always returned and default is always loaded."""
     return SetToDefault(filename)
 
 def set_generator(generator, turn_on, amplitude_dbfs, frequency):
+    """Sets the generator to the specified amplitude and frequency.
+       The current units are used.
+       
+       generator        One of LEFTOUT or RIGHTOUT
+       turn_on          True to turn on the generator, false to
+                        leave it off
+       amplitude_dbfs   The amplitude (in dBFS)
+       frequency        The frequency of the sine wave (in Hz)"""
     SetGenerator(generator, turn_on, amplitude_dbfs, frequency)
 
-def run_single(ampl1, freq1):
-    RunSingle(ampl1, freq1)
-
 def run():
+    """This is the same as pressing the RUN button on the front
+       panel when the analyzer is stopped."""
     Run()
 
 def stop():
+    """This is the same as pressing the STOP button on the front
+       panel when the analyzer is stopped."""
     Stop()
 
+def run_single_at_level_and_frequency(ampl1, freq1):
+    """This will set Generator 1 to active, to an amplitude of
+       amp1, and a frequency of freq1 and then a measurement will
+       be made with the new generator settings. A single acquisition
+       will be performed. After the acquisition finishes, the
+       analyzer will automatically stop. The collected data can then
+       be obtained using the GetData() function. Note that this
+       function only starts the acquisition. The function will return
+       immediately, and then the acquistion state must be polled via
+       GetAcquisitionState() to know when the acquisition has
+       finished.
+       
+       ampl1    The desired amplitude of Generator 1
+       freq1    The desired frequency of Generator 1"""
+    RunSingle(ampl1, freq1)
+
 def run_single():
+    """Performs a single acquisition with all of the current
+       settings. After the acquisition finishes, the analyzer will 
+	   automatically stop. The collected data can then be obtained
+       using the GetData() function. Note that this function only
+       starts the acquisition. The function will return immediately,
+       and then the acquistion state must be polled via
+       GetAcquisitionState() to know when the acquisition has finished."""
     RunSingle()
 
 def run_single_freq_response(ampl):
+    """Performs a single frequency response sweep.
+    
+       ampl     The desired amplitude of the step signal (on
+                Generator 1)"""
     RunSingleFR(ampl)
 
 def get_acquisition_state():
+    """Returns the state of the analyzer. The state will either be
+       STOPPED or BUSY."""
     return GetAcquisitionState()
 
 def get_data(channel):
+    """Retrieves the last collected data. If this is called while
+       the analyzer is busy, the result is undefined. The returned
+       data is a list of tuples of spectrum data, and each point
+       contains the data amplitude (expressed linearly, and
+       referenced to full scale) and data frequency. Typically,
+       you will want to convert this amplitude data into dB.
+       
+       channel      The channel to obtain the dats from (one of
+                    LEFTIN or RIGHTIN)"""
     cdef PointFVector data
     data.length = GetLastDataLength(channel)
     data.values = <PointF*> PyMem_Malloc(data.length * sizeof(PointF))
@@ -80,10 +162,41 @@ def get_data(channel):
     finally:
         PyMem_Free(data.values)
 
+def get_time_data(channel):
+    """Retrieves the last collected time data. If this is called
+       while the analyzer is busy, the result is undefined. The
+       returned data is a list of tuples of time data, and
+       each point contains the data amplitude (y-value rangning from
+       -1 to 1) and time.
+       
+       channel      The channel to obtain the dats from (one of
+                    LEFTIN or RIGHTIN)"""
+    cdef PointFVector data
+    data.length = GetLastTimeDataLength(channel)
+    data.values = <PointF*> PyMem_Malloc(data.length * sizeof(PointF))
+    if not data.values:
+        raise MemoryError("Failed to allocate memory")
+    try:
+        GetTimeData(channel, &data)
+        return [(data.values[i].x, data.values[i].y) for i in range(data.length)]
+    finally:
+        PyMem_Free(data.values)
+
 def compute_power_DB_on_last_data(channel):
+    """Compute the power of the data from the last acquisition.
+    
+       channel      The channel to obtain the dats from (one of
+                    LEFTIN or RIGHTIN)
+
+       Returns the computed power in dB."""
     return ComputePowerDBOnLastData(channel)
 
 def compute_power_DB(data):
+    """Compute the power of the given spectrum data.
+    
+       data     The spectrum data
+       
+       Returns the computed power in dB."""
     cdef PointFVector cdata
     PointFVectorFromPythonList(&cdata, data)
     try:
@@ -91,21 +204,51 @@ def compute_power_DB(data):
     finally:
         PyMem_Free(cdata.values)
 
-def compute_power_DB_on_last_data2(channel, startFreq, endFreq):
-    return ComputePowerDBOnLastData(channel, startFreq, endFreq)
+def compute_power_DB_on_last_data_over_bandwidth(channel, start_freq, end_freq):
+    """Compute the power of the data from the last acquisition
+       over the given bandwidth.
+    
+       channel      The channel to obtain the dats from (one of
+                    LEFTIN or RIGHTIN)
+       start_freq   The start frequency
+       end_freq     The end frequency
 
-def compute_power_DB2(data, startFreq, endFreq):
+       Returns the computed power in dB."""
+    return ComputePowerDBOnLastData(channel, start_freq, end_freq)
+
+def compute_power_DB_over_bandwidth(data, start_freq, end_freq):
+    """Compute the power of the given spectrum data over the
+       given bandwidth.
+    
+       data         The spectrum data
+       start_freq   The start frequency
+       end_freq     The end frequency
+       
+       Returns the computed power in dB."""
     cdef PointFVector cdata
     PointFVectorFromPythonList(&cdata, data)
     try:
-        return ComputePowerDB(&cdata, startFreq, endFreq)
+        return ComputePowerDB(&cdata, start_freq, end_freq)
     finally:
         PyMem_Free(cdata.values)
 
 def compute_peak_power_DB_on_last_data(channel):
+    """Find the peak and compute the power of the data from
+       the last acquisition.
+    
+       channel      The channel to obtain the dats from (one of
+                    LEFTIN or RIGHTIN)
+
+       Returns the computed power in dB."""
     return ComputePeakPowerDBOnLastData(channel)
 
 def compute_peak_power_DB(data):
+    """Find the peak and compute the power of the given
+       spectrum data.
+    
+       data     The spectrum data
+       
+       Returns the computed power in dB."""
     cdef PointFVector cdata
     PointFVectorFromPythonList(&cdata, data)
     try:
@@ -114,9 +257,21 @@ def compute_peak_power_DB(data):
         PyMem_Free(cdata.values)
 
 def compute_THD_percent_on_last_data(channel, fundamental, max_freq):
+    """Given a previous data acquisition, this will compute the
+       THD of the data from the last acquisition.
+       
+       channel      The channel to obtain the dats from (one of
+                    LEFTIN or RIGHTIN)
+       fundamental  The target fundamental frequency
+       max_freq     The upper harmonic to consider (in Hz)"""
     return ComputeTHDPctOnLastData(channel, fundamental, max_freq)
 
 def compute_THD_percent(data, fundamental, max_freq):
+    """Compute the THD of the given spectrum data.
+       
+       data         The spectrum data
+       fundamental  The target fundamental frequency
+       max_freq     The upper harmonic to consider (in Hz)"""
     cdef PointFVector cdata
     PointFVectorFromPythonList(&cdata, data)
     try:
@@ -124,18 +279,38 @@ def compute_THD_percent(data, fundamental, max_freq):
     finally:
         PyMem_Free(cdata.values)
 
-def compute_THDN_percent_on_last_data(channel, fundamental, minFreq, max_freq):
-    return ComputeTHDNPctOnLastData(channel, fundamental, minFreq, max_freq)
+def compute_THDN_percent_on_last_data(channel, fundamental, min_freq, max_freq):
+    """Given a previous data acquisition, this will compute the
+       THD+N of the data from the last acquisition.
+       
+       channel      The channel to obtain the dats from (one of
+                    LEFTIN or RIGHTIN)
+       fundamental  The target fundamental frequency
+       min_freq     The minimum frequency for the noise calculation
+       max_freq     The upper harmonic to consider (in Hz)"""
+    return ComputeTHDNPctOnLastData(channel, fundamental, min_freq, max_freq)
 
-def compute_THDN_percent(data, fundamental, minFreq, max_freq):
+def compute_THDN_percent(data, fundamental, min_freq, max_freq):
+    """Compute the THD+N of the given spectrum data.
+       
+       data         The spectrum data
+       fundamental  The target fundamental frequency
+       min_freq     The minimum frequency for the noise calculation
+       max_freq     The upper harmonic to consider (in Hz)"""
     cdef PointFVector cdata
     PointFVectorFromPythonList(&cdata, data)
     try:
-        return ComputeTHDNPct(&cdata, fundamental, minFreq, max_freq)
+        return ComputeTHDNPct(&cdata, fundamental, min_freq, max_freq)
     finally:
         PyMem_Free(cdata.values)
 
+# ------------------------------------------------------------------
+# Internal helper functions
+# ------------------------------------------------------------------
 cdef PointFVectorFromPythonList(PointFVector *cdata, data):
+    """Allocates a PointFVector array for the given list of tuples.
+
+       It is up to the caller to later free the allocated array."""
     cdata.length = len(data)
     cdata.values = <PointF*> PyMem_Malloc(cdata.length * sizeof(PointF))
     if not cdata.values:

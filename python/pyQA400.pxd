@@ -42,6 +42,8 @@ cdef extern from "QA400API.h" namespace "QA400API":
     AcquisitionState GetAcquisitionState()
     unsigned int GetLastDataLength(ChannelType channel)
     void GetData(ChannelType channel, PointFVector *data)
+    unsigned int GetLastTimeDataLength(ChannelType channel)
+    void GetTimeData(ChannelType channel, PointFVector *data)
     double ComputePowerDBOnLastData(ChannelType channel)
     double ComputePowerDB(PointFVector *data)
     double ComputePowerDBOnLastData(ChannelType channel, double startFreq, double endFreq)

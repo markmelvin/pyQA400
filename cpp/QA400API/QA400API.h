@@ -30,7 +30,7 @@ public:
 	enum GenType { Gen1, Gen2 };
 
 	/// <summary>
-	/// Launches the application if it is not already running. 
+	/// Launches the QA400 application if it is not already running. 
 	/// </summary>
 	/// <returns></returns>
 	static void LaunchApplicationIfNotRunning();
@@ -47,10 +47,16 @@ public:
 	/// </summary>
 	/// <returns></returns>
 	static void GetName(char *pBuffer, unsigned int length);
+
+	/// <summary>
+	/// Returns the length of the string that would be returned by GetName.  The returned
+	/// length does not include a byte for the null termination character.
+	/// </summary>
+	/// <returns></returns>
 	static unsigned int GetNameLength();
 
 	/// <summary>
-	/// Returns true if the hardware is connected and functioning. 
+	///  
 	/// </summary>
 	/// <returns></returns>
 	static bool IsConnected();
@@ -61,6 +67,15 @@ public:
 	/// is returned. If the filename is empty then true is always returned and default is always loaded. 
 	/// </summary>
 	static bool SetToDefault(const char *fileName);
+
+	/// <summary>
+	/// Sets the generator to the specified amplitude and frequency. The current units are used. 
+	/// </summary>
+	/// <param name="gen">Generator 1 or 2</param>
+	/// <param name="isOn">Sets on/off state</param>
+	/// <param name="ampl">Sets amplitude</param>
+	/// <param name="freq">Sets frequency. This might be rounded, depending on the host settings</param>
+	static void SetGenerator(GenType gen, bool isOn, double ampl, double freq);
 
 	/// <summary>
 	/// This is the same as pressing the RUN button on the front panel when the analyzer is stopped.
@@ -98,7 +113,7 @@ public:
 	static void RunSingleFR(double ampl);
 
 	/// <summary>
-	///  Returns the state of the analyzer. The state will either be STOPPED or BUSY
+	///  Returns the state of the analyzer. The state will either be STOPPED or BUSY.
 	/// </summary>
 	/// <returns></returns>
 	static AcquisitionState GetAcquisitionState();
@@ -227,15 +242,6 @@ public:
 	/// <param name="maxFreq">Determines the max frequency that will be used for the noise and THD computation</param>
 	/// <returns>THDN level in %</returns>
 	static double ComputeTHDNPct(PointFVector *data, double fundamental, double minFreq, double maxFreq);
-
-	/// <summary>
-	/// Sets the generator to the specified amplitude and frequency. The current units are used. 
-	/// </summary>
-	/// <param name="gen">Generator 1 or 2</param>
-	/// <param name="isOn">Sets on/off state</param>
-	/// <param name="ampl">Sets amplitude</param>
-	/// <param name="freq">Sets frequency. This might be rounded, depending on the host settings</param>
-	static void SetGenerator(GenType gen, bool isOn, double ampl, double freq);
 
 	/// <summary>
 	/// Sets the input and output offsets used in all calculations.

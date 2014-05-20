@@ -6,8 +6,30 @@
 #include "QA400API.h"
 #include <Windows.h> // For Sleep()
 
+bool connect_to_analyzer(void)
+{
+	int timeout = 100;
+	while (timeout > 0)
+	{
+		if (QA400API::IsConnected())
+		{
+			return TRUE;
+		}
+		Sleep(100);
+		timeout--;
+	}
+	return FALSE;
+}
+
 int _tmain(int argc, _TCHAR* argv[])
 {
+	if (!connect_to_analyzer())
+	{
+		printf("Failed to connect to analyzer. Exiting.\n");
+		exit(1);
+	}
+
+	Sleep(2000);
 	unsigned int nameLength = QA400API::GetNameLength();
 	if (nameLength > 0) {
 		char *pName = new char[nameLength + 1];
@@ -15,7 +37,6 @@ int _tmain(int argc, _TCHAR* argv[])
 		printf("%s\n", pName);
 		delete [] pName;
 	}
-	printf("IsConnected?: %s\n", QA400API::IsConnected() ? "TRUE" : "FALSE");
 	printf("Channel type left out: %d\n", QA400API::ChannelType::LeftOut);
 
 	printf("Calculating THD percent... ");
@@ -42,7 +63,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	printf("%fdB\n", pwr);
 	pwr = QA400API::ComputePeakPowerDB(&data);
 	printf("%fdB\n", pwr);
-
+	QA400API::RunSingleFR(0.65);
 	free(data.values);
 
 	return 0;

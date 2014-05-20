@@ -9,9 +9,15 @@ QA400Interface^ QA400Application::getAnalyzer()
 {
 	if (!QA400Application::analyzer)
 	{
+		// Retry for a total of 5 seconds
+		int numretries = 50;
 		QA400API::LaunchApplicationIfNotRunning();
-		Thread::Sleep(2000);
-		analyzer = (QA400Interface^) QAConnectionManager::ConnectTo(QAConnectionManager::Devices::QA400);
+		while (!analyzer && numretries > 0)
+		{
+			analyzer = (QA400Interface^) QAConnectionManager::ConnectTo(QAConnectionManager::Devices::QA400);
+			Thread::Sleep(100);
+			numretries--;
+		}
 	}
 	return analyzer;
 }
@@ -28,7 +34,8 @@ void QA400API::LaunchApplicationIfNotRunning()
 /// ----------------------------------------------------------------
 void QA400API::GetName(char *pBuffer, unsigned int length)
 {
-	strncpy(pBuffer, ToStdString(QA400Application::getAnalyzer()->GetName()).c_str(), length);
+	System::String^ s = QA400Application::getAnalyzer()->GetName();
+	strncpy(pBuffer, ToStdString(s).c_str(), s->Length);
 	pBuffer[length] = '\0';
 }
 
@@ -48,7 +55,12 @@ bool QA400API::SetToDefault(const char *fileName)
 /// ----------------------------------------------------------------
 bool QA400API::IsConnected()
 {
-	return QA400Application::getAnalyzer()->IsConnected();
+	QA400Interface^ analyzer = QA400Application::getAnalyzer();
+	if (analyzer)
+	{
+		return analyzer->IsConnected();
+	}
+	return false;
 }
 
 /// ----------------------------------------------------------------

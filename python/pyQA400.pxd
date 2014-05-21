@@ -19,7 +19,7 @@ cdef extern from "QA400API.h":
         LeftOut "QA400API::LeftOut"
         RightOut "QA400API::RightOut"
 
-    enum UnitsType "QA400API::Unitsype":
+    enum UnitsType "QA400API::UnitsType":
         dBFS "QA400API::dBFS"
         dBV "QA400API::dBV"
 

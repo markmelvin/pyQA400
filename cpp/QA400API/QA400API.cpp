@@ -245,3 +245,10 @@ void QA400API::SetGenerator(GenType gen, bool isOn, double ampl, double freq)
 	QA400Application::getAnalyzer()->SetGenerator((Com::QuantAsylum::QA400::GenType)gen, isOn, ampl, freq);
 }
 
+/// ----------------------------------------------------------------
+void QA400API::SetUnits(UnitsType units)
+{
+	QA400Application::getAnalyzer()->SetUnits((Com::QuantAsylum::QA400::UnitsType)units);
+}
+
+

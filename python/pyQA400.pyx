@@ -304,6 +304,12 @@ def compute_THDN_percent(data, fundamental, min_freq, max_freq):
     finally:
         PyMem_Free(cdata.values)
 
+def set_units(units):
+    """Sets the units for the data.
+    
+       units        One of DBFS or DBV"""
+    SetUnits(units)
+
 # ------------------------------------------------------------------
 # Internal helper functions
 # ------------------------------------------------------------------

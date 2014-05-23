@@ -21,31 +21,31 @@ def get_peak_power(generator, channel, level, fundamental):
         time.sleep(0.01)
     return pyQA400.compute_peak_power_DB_on_last_data(channel)
 
-def frequency_response(output_level_dBV=-10, freq_start_hz=10,
-                       freq_end_hz=50000, points_per_octave=10,
-                       generator=pyQA400.GEN1,
-                       input_channel=pyQA400.LEFTIN):
+def input_versus_output(start_dBV, end_dBV, step_dBV,
+                        frequency_hz=1000,
+                        generator=pyQA400.GEN1,
+                        input_channel=pyQA400.LEFTIN):
 
-                            # Create a list of frequencies to test
-    test_freqs = utils.get_frequency_list(freq_start_hz, freq_end_hz, 
-                                    points_per_octave=points_per_octave)
+    # Create a list of levels to sweep across
+    test_levels = utils.linspace(start_dBV, end_dBV, step=step_dBV)
 
     results = []
-    for freq in test_freqs:
-        results.append( (freq, get_peak_power(generator, input_channel,
-                                    output_level_dBV, freq)) )
+    for level in test_levels:
+        results.append( (level, 
+                get_peak_power(generator, input_channel,
+                               level, frequency_hz)) )
     return results
 
 def plot(data):
     x_data = [w[0] for w in data]
     y_data = [w[1] for w in data]
-    win = pg.GraphicsWindow(title="Frequency Response")
+    win = pg.GraphicsWindow(title="Input versus Output")
 
     # Enable antialiasing for prettier plots
     pg.setConfigOptions(antialias=True)
 
-    p1 = win.addPlot(title="Frequency Response")
-    p1.setLogMode(True, False)
+    p1 = win.addPlot(title="Input versus Output")
+    p1.setLogMode(False, False)
     p1.plot(x_data, y_data)
 
 # --------------------------------------------------------------------------
@@ -57,8 +57,7 @@ if __name__ == "__main__":
         sys.exit(1)
 
     initialize_analyzer()
-    data = frequency_response(freq_start_hz=100, freq_end_hz=50000,
-                              points_per_octave=20)
+    data = input_versus_output(-84, 3, 3)
     if SHOULD_PLOT:
         import pyqtgraph as pg
         plot(data)

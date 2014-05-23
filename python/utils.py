@@ -2,6 +2,31 @@
 # -*- coding: iso-8859-1 -*-
 import math
 
+
+def linspace(start, end, n_values=None, step=None):
+    """Function that generates a list of numbers. Specify one
+       of n_values or step, but not both.
+
+       If n_values is specified, generates a linearly-spaced
+       list of 'n_values' numbers from 'start' to 'end'.
+
+       If step is specified, generates a list of numbers
+       from 'start' to 'end' separated by 'step'."""
+    if (n_values is None and step is None) or \
+       (n_values is not None and step is not None):
+        raise RuntimeError, "You must specify one (and only one) of n_values or step."
+
+    diff = step
+    num_vals = n_values
+    if n_values is not None:
+        if n_values < 2:
+            return [end]
+        diff = (float(end) - start)/(n_values - 1)
+    else:
+        num_vals = int(((end - start) / step) + 1)
+    return [diff * i + start  for i in range(num_vals)]
+
+
 def get_frequency_list(freq_start_hz, freq_end_hz,
                        freq_step=None, points_per_octave=None):
     """Builds a list of frequencies from freq_start_hz to
@@ -19,32 +44,31 @@ def get_frequency_list(freq_start_hz, freq_end_hz,
        (freq_step is not None and points_per_octave is not None):
         raise RuntimeError, "You must specify one (and only one) of freq_step or points_per_octave."
 
-    # Create a list of frequencies to test
-    # (we don't use list comprehensions or range so we can support
-    #  floating point step values)
+    # If using a step value, just use linspace as-is
+    if freq_step is not None:
+        return linspace(freq_start_hz, freq_end_hz, step=freq_step)
+
+    # If using points per octave, things get a little more challenging and
+    # we build up the list with a call to linspace for each octave
     freqs = []
     f = freq_start_hz
-
-    if freq_step is not None:
-        while f <= freq_end_hz:
-            freqs.append(f)
-            f += freq_step
-
     if points_per_octave is not None:
         _exp = 0
         while _exp < math.ceil(math.log10(freq_end_hz)):
             f = 10**_exp
             end = 10**(_exp+1)
-            step = float(end) / float(points_per_octave)
-            while f <= end:
-                if not f in freqs:
-                    freqs.append(f)
-                f += step
+            fstep = float(end) / float(points_per_octave)
+            freqs.extend([w for w in linspace(f, end, step=fstep) if w not in freqs])
             _exp += 1
 
     return [w for w in freqs if (w >= freq_start_hz and w <= freq_end_hz)]
 
 if __name__ == "__main__":
+    print linspace(0, 10, step=1)
+    print linspace(4, 8, step=1)
+    print linspace(4, 8, step=0.25)
+    print linspace(1, 10, n_values=1)
+    
     print get_frequency_list(200, 20000, freq_step=100)
     print get_frequency_list(10, 20000, freq_step=100)
     print get_frequency_list(200, 20000, freq_step=333)

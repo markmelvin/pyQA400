@@ -57,7 +57,9 @@ if __name__ == "__main__":
         sys.exit(1)
 
     initialize_analyzer()
-    data = input_versus_output(-84, 3, 3)
+    data = input_versus_output(-100, -10, 2,
+                               generator=pyQA400.GEN2,
+                               input_channel=pyQA400.RIGHTIN)
     if SHOULD_PLOT:
         import pyqtgraph as pg
         plot(data)

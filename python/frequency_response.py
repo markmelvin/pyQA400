@@ -57,8 +57,12 @@ if __name__ == "__main__":
         sys.exit(1)
 
     initialize_analyzer()
-    data = frequency_response(freq_start_hz=100, freq_end_hz=50000,
-                              points_per_octave=20)
+    data = frequency_response(output_level_dBV=-46,
+                              freq_start_hz=100,
+                              freq_end_hz=10000,
+                              points_per_octave=20,
+                              generator=pyQA400.GEN2,
+                              input_channel=pyQA400.RIGHTIN)
     if SHOULD_PLOT:
         import pyqtgraph as pg
         plot(data)

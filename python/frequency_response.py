@@ -14,12 +14,22 @@ def initialize_analyzer():
     pyQA400.set_generator(pyQA400.GEN2, False, -160, 1000)
     time.sleep(0.5)
 
-def get_peak_power(generator, channel, level, fundamental):
+def get_magnitude_and_phase(generator, channel, level, fundamental):
+    phase_ref_channel = pyQA400.RIGHTOUT
+    if generator == pyQA400.GEN1:
+        phase_ref_channel = pyQA400.LEFTOUT
+
     pyQA400.set_generator(generator, True, level, fundamental)
     pyQA400.run_single()
     while (pyQA400.get_acquisition_state() == pyQA400.BUSY):
         time.sleep(0.01)
-    return pyQA400.compute_peak_power_DB_on_last_data(channel)
+
+    mag = pyQA400.compute_peak_power_DB_on_last_data(channel)
+    phase = pyQA400.compute_phase_on_last_data(phase_ref_channel, 
+                                               channel, 
+                                               True, 
+                                               fundamental)
+    return (mag, phase)
 
 def frequency_response(output_level_dBV=-10, freq_start_hz=10,
                        freq_end_hz=50000, points_per_octave=10,
@@ -32,21 +42,25 @@ def frequency_response(output_level_dBV=-10, freq_start_hz=10,
 
     results = []
     for freq in test_freqs:
-        results.append( (freq, get_peak_power(generator, input_channel,
-                                    output_level_dBV, freq)) )
+        results.append( (freq, get_magnitude_and_phase(generator,
+                                                       input_channel,
+                                                       output_level_dBV,
+                                                       freq)) )
     return results
 
 def plot(data):
     x_data = [w[0] for w in data]
-    y_data = [w[1] for w in data]
+    y_data1 = [w[1][0] for w in data]
+    y_data2 = [w[1][1] for w in data]
     win = pg.GraphicsWindow(title="Frequency Response")
 
     # Enable antialiasing for prettier plots
     pg.setConfigOptions(antialias=True)
 
-    p1 = win.addPlot(title="Frequency Response")
+    p1 = win.addPlot(title="Magnitude and Phase")
     p1.setLogMode(True, False)
-    p1.plot(x_data, y_data)
+    p1.plot(x_data, y_data1)
+    p1.plot(x_data, y_data2)
 
 # --------------------------------------------------------------------------
 if __name__ == "__main__":
@@ -57,12 +71,12 @@ if __name__ == "__main__":
         sys.exit(1)
 
     initialize_analyzer()
-    data = frequency_response(output_level_dBV=-46,
+    data = frequency_response(output_level_dBV=-10,
                               freq_start_hz=100,
-                              freq_end_hz=10000,
-                              points_per_octave=20,
-                              generator=pyQA400.GEN2,
-                              input_channel=pyQA400.RIGHTIN)
+                              freq_end_hz=20000,
+                              points_per_octave=5,
+                              generator=pyQA400.GEN1,
+                              input_channel=pyQA400.LEFTIN)
     if SHOULD_PLOT:
         import pyqtgraph as pg
         plot(data)

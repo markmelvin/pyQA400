@@ -220,6 +220,34 @@ double QA400API::ComputeTHDPct(PointFVector *data, double fundamental, double ma
 }
 
 /// ----------------------------------------------------------------
+double QA400API::ComputePhaseOnLastData(ChannelType reference_channel, ChannelType signal_channel, bool applyCompensation, double compensationFreq)
+{
+	array<System::Drawing::PointF>^ reference_data = QA400Application::getAnalyzer()->GetTimeData((Com::QuantAsylum::QA400::ChannelType) reference_channel);
+	array<System::Drawing::PointF>^ signal_data = QA400Application::getAnalyzer()->GetTimeData((Com::QuantAsylum::QA400::ChannelType) signal_channel);
+	return QA400Application::getAnalyzer()->ComputePhase(reference_data, signal_data, applyCompensation, compensationFreq);
+}
+
+/// ----------------------------------------------------------------
+double QA400API::ComputePhase(PointFVector *reference, PointFVector *signal, bool applyCompensation, double compensationFreq)
+{
+	PointF *curPt = reference->values;
+	array<System::Drawing::PointF>^ _refdata = gcnew array<System::Drawing::PointF>(reference->length);
+	array<System::Drawing::PointF>^ _sigdata = gcnew array<System::Drawing::PointF>(signal->length);
+	for (size_t i = 0; i < reference->length; i++)
+	{
+		_refdata[i] = System::Drawing::PointF(curPt->x, curPt->y);
+		curPt++;
+	}
+	curPt = signal->values;
+	for (size_t i = 0; i < signal->length; i++)
+	{
+		_sigdata[i] = System::Drawing::PointF(curPt->x, curPt->y);
+		curPt++;
+	}
+	return QA400Application::getAnalyzer()->ComputePhase(_refdata, _sigdata, applyCompensation, compensationFreq);
+}
+
+/// ----------------------------------------------------------------
 double QA400API::ComputeTHDNPctOnLastData(ChannelType channel, double fundamental, double minFreq, double maxFreq)
 {
 	array<System::Drawing::PointF>^ data = QA400Application::getAnalyzer()->GetData((Com::QuantAsylum::QA400::ChannelType) channel);

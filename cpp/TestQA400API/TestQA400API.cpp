@@ -39,7 +39,6 @@ int _tmain(int argc, _TCHAR* argv[])
 	}
 	printf("Channel type left out: %d\n", QA400API::ChannelType::LeftOut);
 
-	printf("Calculating THD percent... ");
 	QA400API::SetGenerator(QA400API::Gen1, false, -10, 1000);
 	QA400API::SetGenerator(QA400API::Gen2, false, -10, 1000);
 	Sleep(500);
@@ -49,6 +48,24 @@ int _tmain(int argc, _TCHAR* argv[])
 	while (QA400API::GetAcquisitionState() == QA400API::AcquisitionState::Busy)
 		;
 
+	double phase = QA400API::ComputePhaseOnLastData(QA400API::ChannelType::LeftOut, QA400API::ChannelType::LeftIn, true, 1000);
+	printf("Phase from ComputePhaseOnLastData: %f%%\n", phase);
+
+	// Perform the same calc, but using the data API
+	PointFVector refdata, sigdata;
+	refdata.length = QA400API::GetLastTimeDataLength(QA400API::ChannelType::LeftOut);
+	sigdata.length = QA400API::GetLastTimeDataLength(QA400API::ChannelType::LeftIn);
+	refdata.values = (PointF *) malloc(sizeof(PointF) * refdata.length);
+	sigdata.values = (PointF *) malloc(sizeof(PointF) * sigdata.length);
+	QA400API::GetTimeData(QA400API::ChannelType::LeftOut, &refdata);
+	QA400API::GetTimeData(QA400API::ChannelType::LeftIn, &sigdata);
+
+	phase = QA400API::ComputePhase(&refdata, &sigdata, true, 1000);
+	printf("Phase from ComputePhase: %f%%\n", phase);
+	free(refdata.values);
+	free(sigdata.values);
+
+	printf("Calculating THD percent... ");
 	PointFVector data;
 	data.length = QA400API::GetLastDataLength(QA400API::ChannelType::LeftIn);
 	data.values = (PointF *) malloc(sizeof(PointF) * data.length);

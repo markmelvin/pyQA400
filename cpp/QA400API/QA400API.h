@@ -221,6 +221,32 @@ public:
 	/// <returns>THD level in %</returns>
 	static double ComputeTHDPct(PointFVector *data, double fundamental, double maxFreq);
 
+	/// <summary>
+	/// Given a previous data acquisition, computes the phase between a reference signal and a second signal and returns the phase between those signals in degrees (-180 to +180). The input
+	/// signals must be sine waves of the exact same frequency. The expected use of this function is as follows: In situations where you are measuring a DUT
+	/// using a single sine generated from the GEN1, the output and input time data series can be retrieved using the GetData() call. Once you have the output and 
+	/// input time data, calling this function will compute the phase between these signals. If 'applyCompensation' is true, then the routine will account
+	/// for internal delays in the QA400. This will ensure that in loopback mode the phase will be reported as 0 degrees for any frequency between 0 Hz and Nyquist.
+	/// </summary>
+	/// <param name="reference_channel">The reference channel</param>
+	/// <param name="signal_channel">The second, signal channel. If this signal occurs slightly after the reference, this the phase will be indicated as lagging</param>
+	/// <param name="applyCompensation">If true, then the routine will compensate for delays inside the QA400. If false, the phase calculation will not. The frequency of compensation must be specified if true, otherwise 0 may be used.</param>
+	/// <returns></returns>
+	static double ComputePhaseOnLastData(ChannelType reference_channel, ChannelType signal_channel, bool applyCompensation, double compensationFreq);
+
+	/// <summary>
+	/// Computes the phase between a reference signal and a second signal and returns the phase between those signals in degrees (-180 to +180). The input
+	/// signals must be sine waves of the exact same frequency. The expected use of this function is as follows: In situations where you are measuring a DUT
+	/// using a single sine generated from the GEN1, the output and input time data series can be retrieved using the GetData() call. Once you have the output and 
+	/// input time data, calling this function will compute the phase between these signals. If 'applyCompensation' is true, then the routine will account
+	/// for internal delays in the QA400. This will ensure that in loopback mode the phase will be reported as 0 degrees for any frequency between 0 Hz and Nyquist.
+	/// </summary>
+	/// <param name="reference">The reference waveform</param>
+	/// <param name="signal">The second signal. If this signal occurs slightly after the reference, this the phase will be indicated as lagging</param>
+	/// <param name="applyCompensation">If true, then the routine will compensate for delays inside the QA400. If false, the phase calculation will not. The frequency of compensation must be specified if true, otherwise 0 may be used.</param>
+	/// <returns></returns>
+	static double ComputePhase(PointFVector *reference, PointFVector *signal, bool applyCompensation, double compensationFreq);
+
 	/// Given a previous data acquisition, this will compute the THDN of the data from the last acquisition. The fundamental parameter specifies the target
 	/// fundamental, and the max frequency specifies the upper harmonic (in Hertz) that will be considered. As this also contains a noise calculation, the lower frequency bound must also be specified. It is expected
 	/// that the minFreq < fundamental < maxFreq

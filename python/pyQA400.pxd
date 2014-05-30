@@ -52,6 +52,8 @@ cdef extern from "QA400API.h" namespace "QA400API":
     double ComputePeakPowerDB(PointFVector *data)
     double ComputeTHDPctOnLastData(ChannelType channel, double fundamental, double maxFreq)
     double ComputeTHDPct(PointFVector *data, double fundamental, double maxFreq)
+    double ComputePhaseOnLastData(ChannelType reference_channel, ChannelType signal_channel, bint applyCompensation, double compensationFreq)
+    double ComputePhase(PointFVector *reference, PointFVector *signal, bint applyCompensation, double compensationFreq)
     double ComputeTHDNPctOnLastData(ChannelType channel, double fundamental, double minFreq, double maxFreq)
     double ComputeTHDNPct(PointFVector *data, double fundamental, double minFreq, double maxFreq)
     void SetGenerator(GenType gen, bint isOn, double ampl, double freq)

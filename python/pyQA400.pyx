@@ -149,8 +149,8 @@ def get_data(channel):
        referenced to full scale) and data frequency. Typically,
        you will want to convert this amplitude data into dB.
        
-       channel      The channel to obtain the dats from (one of
-                    LEFTIN or RIGHTIN)"""
+       channel      The channel to obtain the data from (one of
+                    LEFTOUT, LEFTIN, RIGHTOUT or RIGHTIN)"""
     cdef PointFVector data
     data.length = GetLastDataLength(channel)
     data.values = <PointF*> PyMem_Malloc(data.length * sizeof(PointF))
@@ -166,11 +166,11 @@ def get_time_data(channel):
     """Retrieves the last collected time data. If this is called
        while the analyzer is busy, the result is undefined. The
        returned data is a list of tuples of time data, and
-       each point contains the data amplitude (y-value rangning from
+       each point contains the data amplitude (y-value ranging from
        -1 to 1) and time.
        
-       channel      The channel to obtain the dats from (one of
-                    LEFTIN or RIGHTIN)"""
+       channel      The channel to obtain the data from (one of
+                    LEFTOUT, LEFTIN, RIGHTOUT or RIGHTIN)"""
     cdef PointFVector data
     data.length = GetLastTimeDataLength(channel)
     data.values = <PointF*> PyMem_Malloc(data.length * sizeof(PointF))
@@ -185,8 +185,8 @@ def get_time_data(channel):
 def compute_power_DB_on_last_data(channel):
     """Compute the power of the data from the last acquisition.
     
-       channel      The channel to obtain the dats from (one of
-                    LEFTIN or RIGHTIN)
+       channel      The channel to obtain the data from (one of
+                    LEFTOUT, LEFTIN, RIGHTOUT or RIGHTIN)
 
        Returns the computed power in dB."""
     return ComputePowerDBOnLastData(channel)
@@ -208,8 +208,8 @@ def compute_power_DB_on_last_data_over_bandwidth(channel, start_freq, end_freq):
     """Compute the power of the data from the last acquisition
        over the given bandwidth.
     
-       channel      The channel to obtain the dats from (one of
-                    LEFTIN or RIGHTIN)
+       channel      The channel to obtain the data from (one of
+                    LEFTOUT, LEFTIN, RIGHTOUT or RIGHTIN)
        start_freq   The start frequency
        end_freq     The end frequency
 
@@ -236,8 +236,8 @@ def compute_peak_power_DB_on_last_data(channel):
     """Find the peak and compute the power of the data from
        the last acquisition.
     
-       channel      The channel to obtain the dats from (one of
-                    LEFTIN or RIGHTIN)
+       channel      The channel to obtain the data from (one of
+                    LEFTOUT, LEFTIN, RIGHTOUT or RIGHTIN)
 
        Returns the computed power in dB."""
     return ComputePeakPowerDBOnLastData(channel)
@@ -260,8 +260,8 @@ def compute_THD_percent_on_last_data(channel, fundamental, max_freq):
     """Given a previous data acquisition, this will compute the
        THD of the data from the last acquisition.
        
-       channel      The channel to obtain the dats from (one of
-                    LEFTIN or RIGHTIN)
+       channel      The channel to obtain the data from (one of
+                    LEFTOUT, LEFTIN, RIGHTOUT or RIGHTIN)
        fundamental  The target fundamental frequency
        max_freq     The upper harmonic to consider (in Hz)"""
     return ComputeTHDPctOnLastData(channel, fundamental, max_freq)
@@ -279,12 +279,56 @@ def compute_THD_percent(data, fundamental, max_freq):
     finally:
         PyMem_Free(cdata.values)
 
+def compute_phase_on_last_data(reference_channel, signal_channel,
+                               apply_compensation, compensation_freq):
+    """Given a previous data acquisition, this will compute the
+       phase of the signal_channel with respect to the
+       reference_channel.
+       
+       reference_channel    The channel to obtain the reference data
+                            from (one of LEFTOUT, LEFTIN, RIGHTOUT
+                            or RIGHTIN)
+       signal_channel       The channel to obtain the signal data
+                            from (one of LEFTOUT, LEFTIN, RIGHTOUT
+                            or RIGHTIN)
+       apply_compensation   If True, the routine will compensate for
+                            delays in the QA400 hardware
+       compensation_freq    If apply_compensation is True, the frequency
+                            of compensation must be specified. If
+                            apply_compensation is False, this parameter
+                            can be 0
+       """
+    return ComputePhaseOnLastData(reference_channel, signal_channel, apply_compensation, compensation_freq)
+
+def compute_phase(reference_data, signal_data, apply_compensation,
+                  compensation_freq):
+    """Compute the phase of the signal_channel with respect to the
+       reference_channel.
+       
+       reference_data       The reference channel data
+       signal_data          The signal channel data
+       apply_compensation   If True, the routine will compensate for
+                            delays in the QA400 hardware
+       compensation_freq    If apply_compensation is True, the frequency
+                            of compensation must be specified. If
+                            apply_compensation is False, this parameter
+                            can be 0
+       """
+    cdef PointFVector crefdata, csigdata
+    PointFVectorFromPythonList(&crefdata, reference_data)
+    PointFVectorFromPythonList(&csigdata, signal_data)
+    try:
+        return ComputePhase(&crefdata, &csigdata, apply_compensation, compensation_freq)
+    finally:
+        PyMem_Free(crefdata.values)
+        PyMem_Free(csigdata.values)
+
 def compute_THDN_percent_on_last_data(channel, fundamental, min_freq, max_freq):
     """Given a previous data acquisition, this will compute the
        THD+N of the data from the last acquisition.
        
-       channel      The channel to obtain the dats from (one of
-                    LEFTIN or RIGHTIN)
+       channel      The channel to obtain the data from (one of
+                    LEFTOUT, LEFTIN, RIGHTOUT or RIGHTIN)
        fundamental  The target fundamental frequency
        min_freq     The minimum frequency for the noise calculation
        max_freq     The upper harmonic to consider (in Hz)"""

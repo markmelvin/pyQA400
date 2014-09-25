@@ -1,5 +1,7 @@
 ##!/usr/bin/env python
 # -*- coding: iso-8859-1 -*-
+from __future__ import print_function
+
 import math
 
 
@@ -14,7 +16,7 @@ def linspace(start, end, n_values=None, step=None):
        from 'start' to 'end' separated by 'step'."""
     if (n_values is None and step is None) or \
        (n_values is not None and step is not None):
-        raise RuntimeError, "You must specify one (and only one) of n_values or step."
+        raise RuntimeError("You must specify one (and only one) of n_values or step.")
 
     diff = step
     num_vals = n_values
@@ -42,7 +44,7 @@ def get_frequency_list(freq_start_hz, freq_end_hz,
        between."""
     if (freq_step is None and points_per_octave is None) or \
        (freq_step is not None and points_per_octave is not None):
-        raise RuntimeError, "You must specify one (and only one) of freq_step or points_per_octave."
+        raise RuntimeError("You must specify one (and only one) of freq_step or points_per_octave.")
 
     # If using a step value, just use linspace as-is
     if freq_step is not None:
@@ -60,16 +62,16 @@ def get_frequency_list(freq_start_hz, freq_end_hz,
     return [w for w in freqs if (w >= freq_start_hz and w <= freq_end_hz)]
 
 if __name__ == "__main__":
-    # print linspace(0, 10, step=1)
-    # print linspace(4, 8, step=1)
-    # print linspace(4, 8, step=0.25)
-    # print linspace(1, 10, n_values=1)
+    # print(linspace(0, 10, step=1))
+    # print(linspace(4, 8, step=1))
+    # print(linspace(4, 8, step=0.25))
+    # print(linspace(1, 10, n_values=1))
     
-    # print get_frequency_list(200, 20000, freq_step=100)
-    # print get_frequency_list(10, 20000, freq_step=100)
-    # print get_frequency_list(200, 20000, freq_step=333)
-    # print get_frequency_list(200, 20000, points_per_octave=3)
-    # print get_frequency_list(10, 100000, points_per_octave=5)
-    # print get_frequency_list(10, 100000, points_per_octave=10)
-    # print get_frequency_list(1, 100000, points_per_octave=10)
-    print get_frequency_list(100, 10000, points_per_octave=20)
+    # print(get_frequency_list(200, 20000, freq_step=100))
+    # print(get_frequency_list(10, 20000, freq_step=100))
+    # print(get_frequency_list(200, 20000, freq_step=333))
+    # print(get_frequency_list(200, 20000, points_per_octave=3))
+    # print(get_frequency_list(10, 100000, points_per_octave=5))
+    # print(get_frequency_list(10, 100000, points_per_octave=10))
+    # print(get_frequency_list(1, 100000, points_per_octave=10))
+    print(get_frequency_list(100, 10000, points_per_octave=20))

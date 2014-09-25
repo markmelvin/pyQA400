@@ -14,9 +14,9 @@ using namespace System::Security::Permissions;
 [assembly:AssemblyTitleAttribute(L"QA400API")];
 [assembly:AssemblyDescriptionAttribute(L"")];
 [assembly:AssemblyConfigurationAttribute(L"")];
-[assembly:AssemblyCompanyAttribute(L"ON Semiconductor")];
+[assembly:AssemblyCompanyAttribute(L"Audiofab")];
 [assembly:AssemblyProductAttribute(L"QA400API")];
-[assembly:AssemblyCopyrightAttribute(L"Copyright (c) ON Semiconductor 2014")];
+[assembly:AssemblyCopyrightAttribute(L"Copyright (c) Audiofab 2014")];
 [assembly:AssemblyTrademarkAttribute(L"")];
 [assembly:AssemblyCultureAttribute(L"")];
 

@@ -1,5 +1,7 @@
 ##!/usr/bin/env python
 # -*- coding: iso-8859-1 -*-
+from __future__ import print_function
+
 import pyQA400
 import utils
 import time
@@ -50,10 +52,10 @@ def plot(data):
 
 # --------------------------------------------------------------------------
 if __name__ == "__main__":
-    SHOULD_PLOT = True
+    SHOULD_PLOT = False
 
     if not pyQA400.connect_to_analyzer():
-        print "Can't find the analyzer. Exiting."
+        print("Can't find the analyzer. Exiting.")
         sys.exit(1)
 
     initialize_analyzer()
@@ -65,4 +67,4 @@ if __name__ == "__main__":
         plot(data)
         pg.QtGui.QApplication.exec_()
     else:
-        print data
+        print(data)

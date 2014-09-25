@@ -20,7 +20,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v100</PlatformToolset>
+    <PlatformToolset>v120</PlatformToolset>
     <CLRSupport>true</CLRSupport>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -77,7 +77,7 @@
       <HintPath>..\..\..\..\..\..\..\Program Files (x86)\QuantAsylum\QA400\QAAnalyzer.exe</HintPath>
     </Reference>
     <Reference Include="QAConnectionManager">
-      <HintPath>..\..\..\..\..\..\..\_work\programs\QAConnectionManager_v1.0\QAConnectionManager.dll</HintPath>
+      <HintPath>..\..\dependencies\QAConnectionManager.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />

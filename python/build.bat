@@ -1,5 +1,8 @@
 @echo OFF
-REM Build script for the pyQA Cython wrapper
+REM Build script for the pyQA400 Cython wrapper
+
+set PYTHONDIR=I:\Python33
+set QAAPPDIR="C:\Program Files (x86)\QuantAsylum\QA400"
 
 IF "%1"=="clean" (
     rmdir /S /Q build
@@ -8,8 +11,8 @@ IF "%1"=="clean" (
     del /Q *.dll
     del /Q *.h
     del /Q *.lib
-    del /Q C:\Python27\QAAnalyzer.exe
-    del /Q C:\Python27\QAConnectionManager.dll
+    del /Q %PYTHONDIR%\QAAnalyzer.exe
+    del /Q %PYTHONDIR%\QAConnectionManager.dll
 ) ELSE (
     @echo Hint: You may need to run set_env.bat once to set up the environment for Visual Studio
 
@@ -23,8 +26,8 @@ IF "%1"=="clean" (
     REM C# managed assembly resolution to work (unless we
     REM want to get into the mess of installing into the GAC
     REM TODO - Make this go away too
-    copy "..\cpp\Debug\QAAnalyzer.exe" C:\Python27
-    copy "..\cpp\Debug\QAConnectionManager.dll" C:\Python27
+    copy %QAAPPDIR%\QAAnalyzer.exe %PYTHONDIR%
+    copy ..\dependencies\QAConnectionManager.dll %PYTHONDIR%
 
-    C:\python27\python setup.py build_ext --inplace
+    %PYTHONDIR%\python setup.py build_ext --inplace
 )

@@ -4,6 +4,10 @@
 #include "QA400_managed_api.h"
 #include "QA400API.h"
 
+/* Just testing
+PathExtender _pathExtender;
+*/
+
 /// Managed class providing access to the managed API
 QA400Interface^ QA400Application::getAnalyzer()
 {

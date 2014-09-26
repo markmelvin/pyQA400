@@ -6,24 +6,13 @@
 #include "QA400API.h"
 #include <Windows.h> // For Sleep()
 
-bool connect_to_analyzer(void)
-{
-	int timeout = 100;
-	while (timeout > 0)
-	{
-		if (QA400API::IsConnected())
-		{
-			return TRUE;
-		}
-		Sleep(100);
-		timeout--;
-	}
-	return FALSE;
-}
-
 int _tmain(int argc, _TCHAR* argv[])
 {
-	if (!connect_to_analyzer())
+	/* Only required if you have installed to a path other than the default */
+	QA400API::AddToSearchPath("I:\\Programs\\QuantAsylum\\");
+
+	/* IsConnected() will ultimately launch the application and connect */
+	if (!QA400API::IsConnected())
 	{
 		printf("Failed to connect to analyzer. Exiting.\n");
 		exit(1);

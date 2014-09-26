@@ -36,6 +36,11 @@ public:
 	static void LaunchApplicationIfNotRunning();
 
 	/// <summary>
+	/// Adds the given path to the search path when looking for the QAAnalyzer executable. 
+	/// </summary>
+	static void AddToSearchPath(char *path);
+
+	/// <summary>
 	/// Returns the friendly name of the host hardware (via pBuffer). 
 	/// In the case of the QA400, this will be "QuantAsylum QA400 Audio Analyzer" without quotes.
 	/// This function will succeed whether or not the hardware is attached to the PC, but the QA400

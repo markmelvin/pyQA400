@@ -10,19 +10,6 @@ using namespace System::Runtime::InteropServices;
 // C# Projects
 using namespace Com::QuantAsylum;
 
-/* Just testing
-class PathExtender {
-public:
-	PathExtender() {
-		// Add additional paths here
-		QAConnectionManager::AddSearchPath("i:\\programs\\quantasylum\\");
-	}
-
-	~PathExtender() {
-	}
-};
-*/
-
 // A managed class that holds a singleton-like reference
 // to the QA400Interface managed object.
 ref class QA400Application

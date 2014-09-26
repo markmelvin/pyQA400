@@ -45,6 +45,13 @@ def launch_application_if_not_running():
     """Launches the QA400 application if it is not already running."""
     LaunchApplicationIfNotRunning()
 
+def add_to_search_path(_path):
+    """Adds the given path to the search path when looking for the QAAnalyzer
+       executable."""
+    py_byte_string = _path.encode('UTF-8')
+    cdef char* c_string = py_byte_string
+    AddToSearchPath(c_string)
+
 def get_name():
     """Returns the friendly name of the host hardware. 
 	   In the case of the QA400, this will be 'QuantAsylum QA400 Audio
@@ -80,7 +87,9 @@ def set_to_default(filename=""):
        settings file is loaded. If indicated file name was successfully
        loaded, then true is returned. If the filename is empty then true
        is always returned and default is always loaded."""
-    return SetToDefault(filename)
+    py_byte_string = filename.encode('UTF-8')
+    cdef char* c_string = py_byte_string
+    return SetToDefault(c_string)
 
 def set_generator(generator, turn_on, amplitude_dbfs, frequency):
     """Sets the generator to the specified amplitude and frequency.

@@ -2,7 +2,7 @@
 REM Build script for the pyQA400 Cython wrapper
 
 set PYTHONDIR=I:\Python33
-set QAAPPDIR="C:\Program Files (x86)\QuantAsylum\QA400"
+set QAAPPDIR=I:\Programs\QuantAsylum\QA400
 
 IF "%1"=="clean" (
     rmdir /S /Q build

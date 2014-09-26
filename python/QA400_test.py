@@ -55,6 +55,9 @@ def test():
 
 # --------------------------------------------------------------------------
 if __name__ == "__main__":
+    # This is only required if your analyzer software is installed in a non-default location
+    pyQA400.add_to_search_path("I:\\Programs\\QuantAsylum\\")
+
     if not pyQA400.connect_to_analyzer():
         print("Can't find the analyzer. Exiting.")
         sys.exit(1)

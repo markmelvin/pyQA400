@@ -4,10 +4,6 @@
 #include "QA400_managed_api.h"
 #include "QA400API.h"
 
-/* Just testing
-PathExtender _pathExtender;
-*/
-
 /// Managed class providing access to the managed API
 QA400Interface^ QA400Application::getAnalyzer()
 {
@@ -36,6 +32,12 @@ void QA400API::LaunchApplicationIfNotRunning()
 }
 
 /// ----------------------------------------------------------------
+void QA400API::AddToSearchPath(char *path)
+{
+	QAConnectionManager::AddSearchPath(ToManagedString(path));
+}
+
+/// ----------------------------------------------------------------
 void QA400API::GetName(char *pBuffer, unsigned int length)
 {
 	System::String^ s = QA400Application::getAnalyzer()->GetName();
@@ -52,8 +54,7 @@ unsigned int QA400API::GetNameLength()
 /// ----------------------------------------------------------------
 bool QA400API::SetToDefault(const char *fileName)
 {
-	String ^name = gcnew String(fileName);
-	return QA400Application::getAnalyzer()->SetToDefault(name);
+	return QA400Application::getAnalyzer()->SetToDefault(ToManagedString(fileName));
 }
 
 /// ----------------------------------------------------------------

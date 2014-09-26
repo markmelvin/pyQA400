@@ -30,6 +30,7 @@ cdef extern from "QA400API.h":
 
 cdef extern from "QA400API.h" namespace "QA400API":
     void LaunchApplicationIfNotRunning()
+    void AddToSearchPath(char *_path)
     void GetName(char *pBuffer, unsigned int length)
     unsigned int GetNameLength()
     bint IsConnected()

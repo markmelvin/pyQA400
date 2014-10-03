@@ -8,8 +8,9 @@
 
 int _tmain(int argc, _TCHAR* argv[])
 {
-	/* Only required if you have installed to a path other than the default */
-	QA400API::AddToSearchPath("I:\\Programs\\QuantAsylum\\");
+	/* Only required if you have installed to a path other than the default.
+	 * MUST BE CALLED FIRST BEFORE ANY OTHER API CALL! */
+	QA400API::AddToSearchPath("I:\\Programs\\QuantAsylum");
 
 	/* IsConnected() will ultimately launch the application and connect */
 	if (!QA400API::IsConnected())

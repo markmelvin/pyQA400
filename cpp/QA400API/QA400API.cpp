@@ -9,6 +9,14 @@ QA400Interface^ QA400Application::getAnalyzer()
 {
 	if (!QA400Application::analyzer)
 	{
+		if (QA400Application::has_resolved_connectionmanagerdll)
+		{
+			for each (String^ _p in QA400Application::resolvedPaths)
+			{
+				QAConnectionManager::AddSearchPath(_p);
+			}
+		}
+
 		// Retry for a total of 5 seconds
 		int numretries = 50;
 		QA400API::LaunchApplicationIfNotRunning();
@@ -20,6 +28,72 @@ QA400Interface^ QA400Application::getAnalyzer()
 		}
 	}
 	return analyzer;
+}
+
+void QA400Application::addToPath(char* path)
+{
+	// If the custom resolver has not yet been hooked up, do so now
+	if (!QA400Application::has_custom_resolver)
+	{
+		AppDomain^ currentDomain = AppDomain::CurrentDomain;
+		currentDomain->AssemblyResolve += gcnew ResolveEventHandler(QA400Application::AssemblyResolveEventHandler);
+		// Pre-populate with some defaults
+		QA400Application::lookupPaths->Add("C:\\Program Files\\QuantAsylum\\");
+		QA400Application::lookupPaths->Add("C:\\Program Files (x86)\\QuantAsylum\\");
+		QA400Application::lookupPaths->Add("D:\\Program Files\\QuantAsylum\\");
+		QA400Application::lookupPaths->Add("D:\\Program Files (x86)\\QuantAsylum\\");
+		QA400Application::lookupPaths->Add("E:\\Program Files\\QuantAsylum\\");
+		QA400Application::lookupPaths->Add("E:\\Program Files (x86)\\QuantAsylum\\");
+	}
+	// Now add the new path to the lookup paths, if it isn't already there
+	String^ _p = ToManagedString(path);
+	if (!QA400Application::lookupPaths->Contains(_p))
+		QA400Application::lookupPaths->Add(_p);
+}
+
+Assembly^ QA400Application::AssemblyResolveEventHandler(Object^ sender, ResolveEventArgs^ args)
+{
+	/* From http://support2.microsoft.com/kb/837908 */
+	//This handler is called only when the common language runtime tries to bind to the assembly and fails.
+
+	//Retrieve the list of referenced assemblies in an array of AssemblyName.
+	Assembly^ MyAssembly;
+	Assembly^ objExecutingAssemblies = Assembly::GetExecutingAssembly();
+
+	array<AssemblyName^, 1>^ arrReferencedAssmbNames = objExecutingAssemblies->GetReferencedAssemblies();
+
+	//Loop through the array of referenced assembly names.
+	for each(AssemblyName^ strAssmbName in arrReferencedAssmbNames)
+	{
+		// Check for the assembly names that have raised the "AssemblyResolve" event.
+		String^ assemblyName = args->Name->Substring(0, args->Name->IndexOf(","));
+		if (strAssmbName->FullName->Substring(0, strAssmbName->FullName->IndexOf(",")) == assemblyName)
+		{
+			for each (String^ _p in QA400Application::lookupPaths)
+			{
+				try {
+					String^ suffix = ".dll";
+					if (assemblyName->Equals("QAAnalyzer"))
+						suffix = ".exe";
+					String^ strTempAssmbPath = _p + "\\QA400\\" + assemblyName + suffix;
+					// Try to load the assembly from the specified path. 					
+					MyAssembly = Assembly::LoadFrom(strTempAssmbPath);
+					if (MyAssembly)
+					{
+						if (!QA400Application::resolvedPaths->Contains(_p))
+							QA400Application::resolvedPaths->Add(_p);
+
+						if (assemblyName->Equals("QAConnectionManager"))
+							QA400Application::has_resolved_connectionmanagerdll = true;
+
+						return MyAssembly;
+					}
+				}
+				catch (...) {}
+			}
+		}
+	}
+	return nullptr;
 }
 
 /// Unmanaged API function bodies (callable from unmanaged C++)
@@ -34,7 +108,7 @@ void QA400API::LaunchApplicationIfNotRunning()
 /// ----------------------------------------------------------------
 void QA400API::AddToSearchPath(char *path)
 {
-	QAConnectionManager::AddSearchPath(ToManagedString(path));
+	QA400Application::addToPath(path);
 }
 
 /// ----------------------------------------------------------------

@@ -74,10 +74,16 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <Reference Include="QAAnalyzer">
-      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\QuantAsylum\QA400\QAAnalyzer.exe</HintPath>
+      <HintPath>I:\Programs\QuantAsylum\QA400\QAAnalyzer.exe</HintPath>
+      <Private>false</Private>
+      <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+      <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
     </Reference>
     <Reference Include="QAConnectionManager">
       <HintPath>..\..\dependencies\QAConnectionManager.dll</HintPath>
+      <Private>false</Private>
+      <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+      <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />

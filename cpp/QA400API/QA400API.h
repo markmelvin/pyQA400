@@ -30,15 +30,24 @@ public:
 	enum GenType { Gen1, Gen2 };
 
 	/// <summary>
+	/// Adds the given path to the search path when looking for QAConnectionManager.dll
+	/// and QAAnalyzer.exe. If you are using this method, it MUST be called as the
+	/// absolute first thing, before any other API call.
+	/// </summary>
+	static void AddToSearchPath(char *path);
+
+	/// <summary>
+	/// Returns true if the analyzer is connected. Launches the application if it is
+	/// not already running.
+	/// </summary>
+	/// <returns></returns>
+	static bool IsConnected();
+
+	/// <summary>
 	/// Launches the QA400 application if it is not already running. 
 	/// </summary>
 	/// <returns></returns>
 	static void LaunchApplicationIfNotRunning();
-
-	/// <summary>
-	/// Adds the given path to the search path when looking for the QAAnalyzer executable. 
-	/// </summary>
-	static void AddToSearchPath(char *path);
 
 	/// <summary>
 	/// Returns the friendly name of the host hardware (via pBuffer). 
@@ -59,12 +68,6 @@ public:
 	/// </summary>
 	/// <returns></returns>
 	static unsigned int GetNameLength();
-
-	/// <summary>
-	///  
-	/// </summary>
-	/// <returns></returns>
-	static bool IsConnected();
 
 	/// <summary>
 	/// Sets the analyzer to a known default state. If fileName is an empty string (which means "", which isn't the same as NULL), then the 

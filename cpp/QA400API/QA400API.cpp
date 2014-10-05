@@ -9,8 +9,9 @@ QA400Interface^ QA400Application::getAnalyzer()
 {
 	if (!QA400Application::analyzer)
 	{
-		if (QA400Application::has_resolved_connectionmanagerdll)
+		if (!QA400Application::has_augmented_path)
 		{
+			QA400Application::has_augmented_path = true;
 			for each (String^ _p in QA400Application::resolvedPaths)
 			{
 				QAConnectionManager::AddSearchPath(_p);
@@ -30,7 +31,7 @@ QA400Interface^ QA400Application::getAnalyzer()
 	return analyzer;
 }
 
-void QA400Application::addToPath(char* path)
+void QA400Application::addToPath(String^ path)
 {
 	// If the custom resolver has not yet been hooked up, do so now
 	if (!QA400Application::has_custom_resolver)
@@ -45,15 +46,15 @@ void QA400Application::addToPath(char* path)
 		QA400Application::lookupPaths->Add("E:\\Program Files\\QuantAsylum\\");
 		QA400Application::lookupPaths->Add("E:\\Program Files (x86)\\QuantAsylum\\");
 	}
+
 	// Now add the new path to the lookup paths, if it isn't already there
-	String^ _p = ToManagedString(path);
-	if (!QA400Application::lookupPaths->Contains(_p))
-		QA400Application::lookupPaths->Add(_p);
+	if (!QA400Application::lookupPaths->Contains(path))
+		QA400Application::lookupPaths->Add(path);
 }
 
 Assembly^ QA400Application::AssemblyResolveEventHandler(Object^ sender, ResolveEventArgs^ args)
 {
-	/* From http://support2.microsoft.com/kb/837908 */
+	/* Based on code in http://support2.microsoft.com/kb/837908 */
 	//This handler is called only when the common language runtime tries to bind to the assembly and fails.
 
 	//Retrieve the list of referenced assemblies in an array of AssemblyName.
@@ -75,16 +76,25 @@ Assembly^ QA400Application::AssemblyResolveEventHandler(Object^ sender, ResolveE
 					String^ suffix = ".dll";
 					if (assemblyName->Equals("QAAnalyzer"))
 						suffix = ".exe";
-					String^ strTempAssmbPath = _p + "\\QA400\\" + assemblyName + suffix;
+					String^ strTempAssmbPath = _p + assemblyName + suffix;
 					// Try to load the assembly from the specified path. 					
 					MyAssembly = Assembly::LoadFrom(strTempAssmbPath);
 					if (MyAssembly)
 					{
+						if (assemblyName->Equals("QAAnalyzer"))
+						{
+							// If we found the QAAnalyzer.exe executable, add the path for future
+							// resolution with and without the 'QA400' suffix.
+							if (_p->LastIndexOf("QA400") >= (_p->Length - 6))
+							{
+								String^ _pathWithoutQA400 = _p->Substring(0, _p->LastIndexOf("QA400"));
+								if (!QA400Application::resolvedPaths->Contains(_pathWithoutQA400))
+									QA400Application::resolvedPaths->Add(_pathWithoutQA400);
+							}
+						}
+
 						if (!QA400Application::resolvedPaths->Contains(_p))
 							QA400Application::resolvedPaths->Add(_p);
-
-						if (assemblyName->Equals("QAConnectionManager"))
-							QA400Application::has_resolved_connectionmanagerdll = true;
 
 						return MyAssembly;
 					}
@@ -108,7 +118,10 @@ void QA400API::LaunchApplicationIfNotRunning()
 /// ----------------------------------------------------------------
 void QA400API::AddToSearchPath(char *path)
 {
-	QA400Application::addToPath(path);
+	String^ s = ToManagedString(path);
+	if (!s->EndsWith("\\"))
+		s += "\\";
+	QA400Application::addToPath(s);
 }
 
 /// ----------------------------------------------------------------

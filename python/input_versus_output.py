@@ -6,6 +6,7 @@ import pyQA400
 import utils
 import time
 import sys
+import os
 
 def initialize_analyzer():
     # Initialize the units to dBV
@@ -54,8 +55,22 @@ def plot(data):
 if __name__ == "__main__":
     SHOULD_PLOT = False
 
-    # This is only required if your analyzer software is installed in a non-default location
-    pyQA400.add_to_search_path("I:\\Programs\\QuantAsylum\\")
+    # Add the dependencies folder to the .NET search path so the 
+    # QAConnectionManager.dll can be found
+    this_pathname = os.path.abspath(os.path.dirname(sys.argv[0]))
+
+    dependencies_path = os.path.normpath(os.path.join(this_pathname,
+                                                      "..", "dependencies"))
+    pyQA400.add_to_search_path(dependencies_path)
+
+    # Also add the local path to the .NET search path (in case you are 
+    # executing in another folder and have copied the QAConnectionManager.dll
+    # locally)
+    pyQA400.add_to_search_path(this_pathname)
+
+    # Also add the location of the QAAnalyzer.exe executable (NOTE: This is only
+    # required if your analyzer software is installed in a non-default location)
+    pyQA400.add_to_search_path("I:\\Programs\\QuantAsylum\\QA400")
 
     if not pyQA400.connect_to_analyzer():
         print("Can't find the analyzer. Exiting.")

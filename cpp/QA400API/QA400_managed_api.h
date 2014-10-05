@@ -21,11 +21,11 @@ ref class QA400Application
 {
 public:
 	static QA400Interface^ getAnalyzer();
-	static void addToPath(char* path);
+	static void addToPath(String^ path);
 private:
 	static QA400Interface^ analyzer;
 	static bool has_custom_resolver = false;
-	static bool has_resolved_connectionmanagerdll = false;
+	static bool has_augmented_path = false;
 	static ArrayList^ lookupPaths = gcnew ArrayList();
 	static ArrayList^ resolvedPaths = gcnew ArrayList();
 	static Assembly^ AssemblyResolveEventHandler(Object^ sender, ResolveEventArgs^ args);

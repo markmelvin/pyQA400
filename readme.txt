@@ -88,26 +88,22 @@ application.
 Testing the Python Application
 ------------------------------
 
-You'll notice that the build.bat script copied both the QAConnectionManager.dll as well as
-the QAAnalyzer.exe to the Python directory. This appears to be required unless you want to
-mess with the C# Global Assembly Cache (GAC). An alternative approach would be to make a small
-py2exe'd "launcher" application and keep the QAConnectionManager.dll and QAAnalyzer.exe in the
-same folder as that launcher .exe - but I have yet to dig more into this to properly figure
-this out.
+If you built everything from scratch, it should "just work" at this point.
 
-For now, because the Python script is launched by "python.exe", the QAConnectionManager.dll
-and a copy of the QAAnalyzer.exe application must reside in that folder to be automatically
-found by .NET, or it must be installed in the GAC. Again, this will be fixed eventually such
-that neither file needs to be copied to the Python directory.
+If you did not build from scratch, but went for the pre-built binaries approach, you must do
+the following manually before attempting to run any of the test applications:
 
-So, if you did not build from scratch, but went for the binaries approach, you must do the
-following manually before attempting to run any of the test applications:
-
-- Copy QAConnectionManager.dll from the "dependencies" folder in this repository, and
-  QAAnalyzer.exe from your installed application directory to your Python folder alongside
-  python.exe
 - Copy pyQA400.pyd and QA400API.dll from the "binaries" folder in this repository to the
   same folder as the Python script you are attempting to run
+
+- If you are attempting to run a script of your own that is not in the "python" folder
+  chances are it will crash when trying to resolve the QAConnectionManager.dll as by
+  default the samples augment the search path with the "dependencies" folder and the
+  local script folder. To fix this, simply copy QAConnectionManager.dll from the
+  "dependencies" folder in this repository to the same directory as your Python script
+  and ensure you use the "AddToSearchPath" API function as shown in the samples to augment
+  the .NET search path with your local script folder.
+
 
 Now run:
 
@@ -127,13 +123,41 @@ to this page:
 
     http://www.quantasylum.com/content/Support/Developer/QA400API.aspx
 
-TODO
-----
 
-- Implement a wrapper around the QAConnectionManager::AddSearchPath API function
-- Fix things such that you do not need to copy the QAConnectionManager.dll or the QAAnalyzer.exe
-  to the Python directory
+Distributing Scripts
+--------------------
 
+In the future, if you want to run your own scripts on another machine, basically what you need
+to do is the following:
+
+- Install the QA400 application and drivers as described in "Installing the QA400 Application
+  and Drivers"
+  
+- Install Python (obviously). It will need to be Python 3.3 unless you built your own Python
+  wrapper from scratch for another version of Python.
+  
+- Put the following files all in the same folder somewhere:
+
+    <your_python_script>.py
+    pyQA400.pyd
+    QA400API.dll
+    QAConnectionManager.dll
+
+- Add the following lines to the start of your script so that QAConnectionManager.dll can
+  be found at runtime:
+
+    this_pathname = os.path.abspath(os.path.dirname(sys.argv[0]))
+    pyQA400.add_to_search_path(this_pathname)
+
+- Optionally, add another search path entry you installed the QA400 application to a non-
+  standard location (not in C:\Program Files\QuantAsylum) so QAAnalyzer.exe can be found
+  at runtime. For example:
+
+    pyQA400.add_to_search_path("I:\\Programs\\QuantAsylum\\QA400")
+
+- Now, you can run your Python script.
+
+    
 Known Issues
 ------------
 

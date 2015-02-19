@@ -60,10 +60,10 @@ def plot(data):
     # Enable antialiasing for prettier plots
     pg.setConfigOptions(antialias=True)
 
-    p1 = win.addPlot(title="Magnitude and Phase")
+    p1 = win.addPlot(title="Frequency Response")
     p1.setLogMode(True, False)
     p1.plot(x_data, y_data1)
-    p1.plot(x_data, y_data2)
+    #p1.plot(x_data, y_data2)
 
 # --------------------------------------------------------------------------
 if __name__ == "__main__":
@@ -91,9 +91,9 @@ if __name__ == "__main__":
         sys.exit(1)
 
     initialize_analyzer()
-    data = frequency_response(output_level_dBV=-10,
-                              freq_start_hz=100,
-                              freq_end_hz=20000,
+    data = frequency_response(output_level_dBV=0,
+                              freq_start_hz=20,
+                              freq_end_hz=70000,
                               points_per_octave=5,
                               generator=pyQA400.GEN1,
                               input_channel=pyQA400.LEFTIN)

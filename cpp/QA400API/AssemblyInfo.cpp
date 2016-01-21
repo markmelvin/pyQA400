@@ -16,7 +16,7 @@ using namespace System::Security::Permissions;
 [assembly:AssemblyConfigurationAttribute(L"")];
 [assembly:AssemblyCompanyAttribute(L"Audiofab")];
 [assembly:AssemblyProductAttribute(L"QA400API")];
-[assembly:AssemblyCopyrightAttribute(L"Copyright (c) Audiofab 2014")];
+[assembly:AssemblyCopyrightAttribute(L"Copyright (c) Audiofab 2016")];
 [assembly:AssemblyTrademarkAttribute(L"")];
 [assembly:AssemblyCultureAttribute(L"")];
 

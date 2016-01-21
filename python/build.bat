@@ -1,7 +1,7 @@
 @echo OFF
 REM Build script for the pyQA400 Cython wrapper
 
-set PYTHONDIR=I:\Python33
+set PYTHONDIR=I:\Programs\Python\Python35-32
 
 IF "%1"=="clean" (
     rmdir /S /Q build

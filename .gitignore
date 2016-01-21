@@ -218,3 +218,10 @@ python/pyQA400.pyd
 python/QA400API.dll
 python/QA400API.h
 python/QA400API.lib
+python/.idea/.name
+python/.idea/misc.xml
+python/.idea/encodings.xml
+python/.idea/python.iml
+python/.idea/modules.xml
+*.pyd
+python/.idea/workspace.xml

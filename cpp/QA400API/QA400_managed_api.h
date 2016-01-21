@@ -13,24 +13,42 @@ using namespace System::Reflection;
 using namespace Com::QuantAsylum;
 
 
+// An application resolver that maintains a list of augmented lookup
+// paths for an assembly.
+ref class QA400ApplicationResolver
+{
+public:
+	void addToPath(String^ path);
+	ArrayList^ resolvedPaths = gcnew ArrayList();
+	ArrayList^ lookupPaths = gcnew ArrayList();
+};
+
+
+// A managed class providing Singleton access to an assembly involved
+// with resolving and finding the QA400 assemblies.
+ref class QA400ApplicationResolverSingleton
+{
+public:
+	static QA400ApplicationResolver^ getResolver();
+private:
+	static QA400ApplicationResolver^ resolver;
+	static Assembly^ AssemblyResolveEventHandler(Object^ sender, ResolveEventArgs^ args);
+};
+
+
 // A managed class that holds a singleton-like reference
-// to the QA400Interface managed object, and provides other
+// to both a QA400Interface managed object, and provides other
 // static methods involved with initialization and
 // Assembly resolution.
 ref class QA400Application
 {
 public:
 	static QA400Interface^ getAnalyzer();
-	static void addToPath(String^ path);
+	static QA400Interface^ getAnalyzer(QA400ApplicationResolver^ resolver);
 private:
 	static QA400Interface^ analyzer;
-	static bool has_custom_resolver = false;
 	static bool has_augmented_path = false;
-	static ArrayList^ lookupPaths = gcnew ArrayList();
-	static ArrayList^ resolvedPaths = gcnew ArrayList();
-	static Assembly^ AssemblyResolveEventHandler(Object^ sender, ResolveEventArgs^ args);
 };
-
 
 //////////////////////////////////////////////////
 // String Conversion Functions

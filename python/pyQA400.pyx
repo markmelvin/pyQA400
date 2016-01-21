@@ -45,12 +45,15 @@ def launch_application_if_not_running():
     """Launches the QA400 application if it is not already running."""
     LaunchApplicationIfNotRunning()
 
-def add_to_search_path(_path):
+def add_to_search_path(_path, should_connect=False):
     """Adds the given path to the search path when looking for the QAAnalyzer
        executable."""
     py_byte_string = _path.encode('UTF-8')
     cdef char* c_string = py_byte_string
-    AddToSearchPath(c_string)
+    AddToSearchPath(c_string, should_connect)
+    if should_connect:
+        return connect_to_analyzer()
+    return False
 
 def get_name():
     """Returns the friendly name of the host hardware. 
@@ -91,16 +94,25 @@ def set_to_default(filename=""):
     cdef char* c_string = py_byte_string
     return SetToDefault(c_string)
 
-def set_generator(generator, turn_on, amplitude_dbfs, frequency):
+def set_generator(generator, turn_on, amplitude, frequency):
     """Sets the generator to the specified amplitude and frequency.
        The current units are used.
        
        generator        One of LEFTOUT or RIGHTOUT
        turn_on          True to turn on the generator, false to
                         leave it off
-       amplitude_dbfs   The amplitude (in dBFS)
+       amplitude        The amplitude
        frequency        The frequency of the sine wave (in Hz)"""
-    SetGenerator(generator, turn_on, amplitude_dbfs, frequency)
+    SetGenerator(generator, turn_on, amplitude, frequency)
+
+def generate_tone(amplitude, frequency, duration_ms):
+    """Generates a constant tone of the specified amplitude, frequency,
+       and duration. The current units are used.
+
+       amplitude        The amplitude
+       frequency        The frequency of the tone (in Hz)
+       duration_ms      The duration, in milliseconds"""
+    GenerateTone(amplitude, frequency, duration_ms)
 
 def run():
     """This is the same as pressing the RUN button on the front

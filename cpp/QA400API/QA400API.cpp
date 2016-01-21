@@ -7,55 +7,76 @@
 /// Managed class providing access to the managed API
 QA400Interface^ QA400Application::getAnalyzer()
 {
+	return QA400Application::getAnalyzer(QA400ApplicationResolverSingleton::getResolver());
+}
+
+QA400Interface^ QA400Application::getAnalyzer(QA400ApplicationResolver^ resolver)
+{
+	// If we have yet to use/find the analyzer - find it
 	if (!QA400Application::analyzer)
 	{
-		if (!QA400Application::has_augmented_path)
+		// Do we have a custom resolver?
+		if (resolver)
 		{
-			QA400Application::has_augmented_path = true;
-			for each (String^ _p in QA400Application::resolvedPaths)
+			// Has the resolver already been connected once?
+			if (!QA400Application::has_augmented_path)
 			{
-				QAConnectionManager::AddSearchPath(_p);
+				QA400Application::has_augmented_path = true;
+				for each (String^ _p in resolver->resolvedPaths)
+				{
+					QAConnectionManager::AddSearchPath(_p);
+				}
 			}
 		}
+
+		// Now try to find the executable
 
 		// Retry for a total of 5 seconds
 		int numretries = 50;
 		QA400API::LaunchApplicationIfNotRunning();
 		while (!analyzer && numretries > 0)
 		{
-			analyzer = (QA400Interface^) QAConnectionManager::ConnectTo(QAConnectionManager::Devices::QA400);
 			Thread::Sleep(100);
+			analyzer = (QA400Interface^) QAConnectionManager::ConnectTo(QAConnectionManager::Devices::QA400);
 			numretries--;
 		}
 	}
 	return analyzer;
 }
 
-void QA400Application::addToPath(String^ path)
+QA400ApplicationResolver^ QA400ApplicationResolverSingleton::getResolver()
 {
-	// If the custom resolver has not yet been hooked up, do so now
-	if (!QA400Application::has_custom_resolver)
+	if (!QA400ApplicationResolverSingleton::resolver)
 	{
+		// Connect the custom resolver on first access
+		QA400ApplicationResolverSingleton::resolver = gcnew QA400ApplicationResolver();
 		AppDomain^ currentDomain = AppDomain::CurrentDomain;
-		currentDomain->AssemblyResolve += gcnew ResolveEventHandler(QA400Application::AssemblyResolveEventHandler);
-		// Pre-populate with some defaults
-		QA400Application::lookupPaths->Add("C:\\Program Files\\QuantAsylum\\");
-		QA400Application::lookupPaths->Add("C:\\Program Files (x86)\\QuantAsylum\\");
-		QA400Application::lookupPaths->Add("D:\\Program Files\\QuantAsylum\\");
-		QA400Application::lookupPaths->Add("D:\\Program Files (x86)\\QuantAsylum\\");
-		QA400Application::lookupPaths->Add("E:\\Program Files\\QuantAsylum\\");
-		QA400Application::lookupPaths->Add("E:\\Program Files (x86)\\QuantAsylum\\");
+		currentDomain->AssemblyResolve += gcnew ResolveEventHandler(QA400ApplicationResolverSingleton::AssemblyResolveEventHandler);
+		// Populate it with some default paths
+		resolver->addToPath("C:\\Program Files\\QuantAsylum\\");
+		resolver->addToPath("C:\\Program Files (x86)\\QuantAsylum\\");
+		resolver->addToPath("D:\\Program Files\\QuantAsylum\\");
+		resolver->addToPath("D:\\Program Files (x86)\\QuantAsylum\\");
+		resolver->addToPath("E:\\Program Files\\QuantAsylum\\");
+		resolver->addToPath("E:\\Program Files (x86)\\QuantAsylum\\");
 	}
-
-	// Now add the new path to the lookup paths, if it isn't already there
-	if (!QA400Application::lookupPaths->Contains(path))
-		QA400Application::lookupPaths->Add(path);
+	return resolver;
 }
 
-Assembly^ QA400Application::AssemblyResolveEventHandler(Object^ sender, ResolveEventArgs^ args)
+void QA400ApplicationResolver::addToPath(String^ path)
+{
+	// Now add the new path to the lookup paths, if it isn't already there
+	if (!QA400ApplicationResolver::lookupPaths->Contains(path))
+	{
+		QA400ApplicationResolver::lookupPaths->Add(path);
+	}
+}
+
+Assembly^ QA400ApplicationResolverSingleton::AssemblyResolveEventHandler(Object^ sender, ResolveEventArgs^ args)
 {
 	/* Based on code in http://support2.microsoft.com/kb/837908 */
 	//This handler is called only when the common language runtime tries to bind to the assembly and fails.
+	resolver = QA400ApplicationResolverSingleton::getResolver();
 
 	//Retrieve the list of referenced assemblies in an array of AssemblyName.
 	Assembly^ MyAssembly;
@@ -70,7 +91,7 @@ Assembly^ QA400Application::AssemblyResolveEventHandler(Object^ sender, ResolveE
 		String^ assemblyName = args->Name->Substring(0, args->Name->IndexOf(","));
 		if (strAssmbName->FullName->Substring(0, strAssmbName->FullName->IndexOf(",")) == assemblyName)
 		{
-			for each (String^ _p in QA400Application::lookupPaths)
+			for each (String^ _p in resolver->lookupPaths)
 			{
 				try {
 					String^ suffix = ".dll";
@@ -88,13 +109,17 @@ Assembly^ QA400Application::AssemblyResolveEventHandler(Object^ sender, ResolveE
 							if (_p->LastIndexOf("QA400") >= (_p->Length - 6))
 							{
 								String^ _pathWithoutQA400 = _p->Substring(0, _p->LastIndexOf("QA400"));
-								if (!QA400Application::resolvedPaths->Contains(_pathWithoutQA400))
-									QA400Application::resolvedPaths->Add(_pathWithoutQA400);
+								if (!resolver->resolvedPaths->Contains(_pathWithoutQA400))
+								{
+									resolver->resolvedPaths->Add(_pathWithoutQA400);
+								}
 							}
 						}
 
-						if (!QA400Application::resolvedPaths->Contains(_p))
-							QA400Application::resolvedPaths->Add(_p);
+						if (!resolver->resolvedPaths->Contains(_p))
+						{
+							resolver->resolvedPaths->Add(_p);
+						}
 
 						return MyAssembly;
 					}
@@ -116,12 +141,19 @@ void QA400API::LaunchApplicationIfNotRunning()
 }
 
 /// ----------------------------------------------------------------
-void QA400API::AddToSearchPath(char *path)
+bool QA400API::AddToSearchPath(char *path, bool shouldConnect)
 {
 	String^ s = ToManagedString(path);
 	if (!s->EndsWith("\\"))
 		s += "\\";
-	QA400Application::addToPath(s);
+
+	QA400ApplicationResolver^ resolver = QA400ApplicationResolverSingleton::getResolver();
+	if (resolver)
+		resolver->addToPath(s);
+
+	if (shouldConnect)
+		return QA400API::IsConnected();
+	return false;
 }
 
 /// ----------------------------------------------------------------
@@ -363,6 +395,12 @@ double QA400API::ComputeTHDNPct(PointFVector *data, double fundamental, double m
 void QA400API::SetGenerator(GenType gen, bool isOn, double ampl, double freq)
 {
 	QA400Application::getAnalyzer()->SetGenerator((Com::QuantAsylum::QA400::GenType)gen, isOn, ampl, freq);
+}
+
+/// ----------------------------------------------------------------
+void QA400API::GenerateTone(double ampl, double freq, int durationMS)
+{
+	QA400Application::getAnalyzer()->GenerateTone(ampl, freq, durationMS);
 }
 
 /// ----------------------------------------------------------------

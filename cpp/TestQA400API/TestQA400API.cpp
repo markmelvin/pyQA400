@@ -10,14 +10,24 @@ int _tmain(int argc, _TCHAR* argv[])
 {
 	/* Only required if you have installed to a path other than the default.
 	 * MUST BE CALLED FIRST BEFORE ANY OTHER API CALL! */
-	QA400API::AddToSearchPath("I:\\Programs\\QuantAsylum\\QA400");
 
+	 /* AddToSearchPath() will ultimately launch the application and connect */
+	if (!QA400API::AddToSearchPath("I:\\Programs\\QuantAsylum\\QA400", true))
+	{
+		printf("Failed to connect to analyzer. Exiting.\n");
+		exit(1);
+	}
+
+	/* Alternately, if you don't need to augment the search path, you can use
+	   this method to connect to the QA400 software. */
 	/* IsConnected() will ultimately launch the application and connect */
+	/*
 	if (!QA400API::IsConnected())
 	{
 		printf("Failed to connect to analyzer. Exiting.\n");
 		exit(1);
 	}
+	*/
 
 	Sleep(2000);
 	unsigned int nameLength = QA400API::GetNameLength();

@@ -29,7 +29,7 @@ cdef extern from "QA400API.h":
 
 
 cdef extern from "QA400API.h" namespace "QA400API":
-    void AddToSearchPath(char *_path)
+    bint AddToSearchPath(char *_path, bint shouldConnect)
     void LaunchApplicationIfNotRunning()
     void GetName(char *pBuffer, unsigned int length)
     unsigned int GetNameLength()
@@ -58,6 +58,7 @@ cdef extern from "QA400API.h" namespace "QA400API":
     double ComputeTHDNPctOnLastData(ChannelType channel, double fundamental, double minFreq, double maxFreq)
     double ComputeTHDNPct(PointFVector *data, double fundamental, double minFreq, double maxFreq)
     void SetGenerator(GenType gen, bint isOn, double ampl, double freq)
+    void GenerateTone(double ampl, double freq, int durationMS);
     void SetOffsets(double inputOffsets, double outputOffsets)
     void SetUnits(UnitsType type)
     void SetBufferLength(unsigned int samples)

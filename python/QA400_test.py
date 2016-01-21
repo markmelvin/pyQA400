@@ -17,7 +17,8 @@ def test():
     pyQA400.set_generator(pyQA400.GEN2, False, -110, 1000)
     time.sleep(0.5)
 
-    FREQS = utils.get_frequency_list(1000, 8000, freq_step=1000)
+    #FREQS = utils.get_frequency_list(1000, 8000, freq_step=1000)
+    FREQS=[]
     MIN_FREQ = 20
     MAX_FREQ = 20000
     AMPLITUDE = -20
@@ -54,6 +55,10 @@ def test():
         print("The peak power (on data from Python) is %f dBFS" % peakpwr)
         print("----")
 
+    print("Generating a fixed tone for 5 seconds...")
+    pyQA400.generate_tone(-3, 1000, 5000)
+    print("Done.")
+        
 # --------------------------------------------------------------------------
 if __name__ == "__main__":
     # Add the dependencies folder to the .NET search path so the 
@@ -71,9 +76,7 @@ if __name__ == "__main__":
 
     # Also add the location of the QAAnalyzer.exe executable (NOTE: This is only
     # required if your analyzer software is installed in a non-default location)
-    pyQA400.add_to_search_path("I:\\Programs\\QuantAsylum\\QA400")
-
-    if not pyQA400.connect_to_analyzer():
+    if not pyQA400.add_to_search_path("I:\\Programs\\QuantAsylum\\QA400", True):
         print("Can't find the analyzer. Exiting.")
         sys.exit(1)
 

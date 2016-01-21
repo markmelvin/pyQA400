@@ -33,14 +33,17 @@ public:
 	/// Adds the given path to the search path when looking for QAConnectionManager.dll
 	/// and QAAnalyzer.exe. If you are using this method, it MUST be called as the
 	/// absolute first thing, before any other API call.
+	/// <param name="path">The search path to add</param>
+	/// <param name="shouldConnect">Whether or not to launch the program and connect afterwards</param>
 	/// </summary>
-	static void AddToSearchPath(char *path);
+	/// <returns>true if the analyzer is connected</returns>
+	static bool AddToSearchPath(char *path, bool shouldConnect);
 
 	/// <summary>
 	/// Returns true if the analyzer is connected. Launches the application if it is
 	/// not already running.
 	/// </summary>
-	/// <returns></returns>
+	/// <returns>true if the analyzer is connected</returns>
 	static bool IsConnected();
 
 	/// <summary>
@@ -84,6 +87,14 @@ public:
 	/// <param name="ampl">Sets amplitude</param>
 	/// <param name="freq">Sets frequency. This might be rounded, depending on the host settings</param>
 	static void SetGenerator(GenType gen, bool isOn, double ampl, double freq);
+
+	/// <summary>
+	/// Generates a constant tone of the specified amplitude, frequency, and duration. The current units are used. 
+	/// </summary>
+	/// <param name="ampl">Sets amplitude</param>
+	/// <param name="freq">Sets frequency. This might be rounded, depending on the host settings</param>
+	/// <param name="durationMS">Sets the duration</param>
+	static void GenerateTone(double ampl, double freq, int durationMS);
 
 	/// <summary>
 	/// This is the same as pressing the RUN button on the front panel when the analyzer is stopped.

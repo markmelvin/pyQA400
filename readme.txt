@@ -8,7 +8,7 @@ Installing the QA400 Application and Drivers
 --------------------------------------------
 
 - Download and install the .NET Framework v4.0 (required by the QA400 application) here,
-  if required (note that it is already included in Windows 8.x):
+  if required (note that it is already included in Windows 8.x and Windows 10):
 
     http://www.microsoft.com/en-us/download/details.aspx?id=17851
 
@@ -16,7 +16,7 @@ Installing the QA400 Application and Drivers
 
     http://www.quantasylum.com/content/Support/Downloads.aspx
 
-  NOTE: I have been using the latest release candidate (v1.0696)
+  NOTE: I have been using the latest release candidate (v1.226)
 
 - Plug in your QA400, and wait for the drivers to successfully install
 - Run the QA400 application and verify that your analyzer works by clicking "Press to Run"
@@ -30,17 +30,17 @@ Pre-Requisites
 Required to make this work is:
 
 Python         http://python.org/
-                 Tested with version 3.3.3
+                 Tested with version 3.3.3, 3.4.2, and 3.5.1 (all 32-bit versions)
 
 And if you are building from scratch:
 
 Cython         http://cython.org/
-                 Used/tested with version 0.20
+                 Used/tested with version 0.20, 0.22, and 0.23.4
 
 Visual Studio  http://www.visualstudio.com/en-us/products/visual-studio-express-vs.aspx
-                 I am using VS Express v2013 for Desktop
+                 I have used VS2010, VS Express v2013 for Desktop and VS 2015 Community
 
-I have built and tested this with Windows 7 and Windows 8.1 (both 64-bit)
+I have built and tested this with Windows 7, Windows 8.1, and Windows 10 (all 64-bit)
 
 If you are using the pre-built binaries from the "binaries" folder of this repository, skip
 down to "Testing the Python Application"
@@ -53,9 +53,9 @@ Build and Installation Instructions
 
 Here are the installation and build instructions:
 
-- Install Python 3.3
-- Install Cython 0.20
-- Install Microsoft Visual Studio Express 2013 for Desktop
+- Install Python
+- Install Cython
+- Install Microsoft Visual Studio
 
 To build the C++/C# bridge .dll using Microsoft Visual Studio:
 
@@ -64,6 +64,8 @@ To build the C++/C# bridge .dll using Microsoft Visual Studio:
 - Under Common Properties > References, you'll likely need to remove and re-add a
   reference to the QAAnalyzer application. Browse to wherever you installed it and
   add the reference to QAAnalyzer.exe.
+- You probably need to fix the tools version as well, depending on your version of
+  Visual Studio
 - Click Build > Build Solution
 
 If all goes well, the build should succeed and you will have a .dll and a test executable.
@@ -133,13 +135,13 @@ to do is the following:
 - Install the QA400 application and drivers as described in "Installing the QA400 Application
   and Drivers"
   
-- Install Python (obviously). It will need to be Python 3.3 unless you built your own Python
+- Install Python (obviously). It will need to be Python 3.4 or 3.5 unless you built your own Python
   wrapper from scratch for another version of Python.
   
 - Put the following files all in the same folder somewhere:
 
     <your_python_script>.py
-    pyQA400.pyd
+    pyQA400.pyd 
     QA400API.dll
     QAConnectionManager.dll
 
@@ -161,7 +163,7 @@ to do is the following:
 Known Issues
 ------------
 
-- There is a bug in the QA400 API that prevents the ComputePhase API from working properly
-  when the analyzer is set to 192 KHz sampling
+- There is a bug in the QA400 API that prevents parts of the API from working properly
+  when the analyzer is set to 192 KHz sampling. Use 48 KHz sampling.
 
 

@@ -19,8 +19,14 @@ ref class QA400ApplicationResolver
 {
 public:
 	void addToPath(String^ path);
-	ArrayList^ resolvedPaths = gcnew ArrayList();
-	ArrayList^ lookupPaths = gcnew ArrayList();
+	ArrayList^ resolvedPaths;
+	ArrayList^ lookupPaths;
+
+	public: QA400ApplicationResolver()
+	{
+		resolvedPaths = gcnew ArrayList();
+		lookupPaths = gcnew ArrayList();
+	}
 };
 
 
@@ -36,18 +42,14 @@ private:
 };
 
 
-// A managed class that holds a singleton-like reference
-// to both a QA400Interface managed object, and provides other
-// static methods involved with initialization and
-// Assembly resolution.
+// A managed class that holds a Singleton reference to a QA400Interface
+// managed object.
 ref class QA400Application
 {
 public:
 	static QA400Interface^ getAnalyzer();
-	static QA400Interface^ getAnalyzer(QA400ApplicationResolver^ resolver);
 private:
 	static QA400Interface^ analyzer;
-	static bool has_augmented_path = false;
 };
 
 //////////////////////////////////////////////////

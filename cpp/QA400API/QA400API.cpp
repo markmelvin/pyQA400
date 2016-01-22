@@ -4,35 +4,27 @@
 #include "QA400_managed_api.h"
 #include "QA400API.h"
 
-/// Managed class providing access to the managed API
-QA400Interface^ QA400Application::getAnalyzer()
-{
-	return QA400Application::getAnalyzer(QA400ApplicationResolverSingleton::getResolver());
-}
 
-QA400Interface^ QA400Application::getAnalyzer(QA400ApplicationResolver^ resolver)
+/// Class providing access to the underlying managed QA400 API
+QA400Interface^ QA400Application::getAnalyzer()
 {
 	// If we have yet to use/find the analyzer - find it
 	if (!QA400Application::analyzer)
 	{
 		// Do we have a custom resolver?
+		QA400ApplicationResolver^ resolver = QA400ApplicationResolverSingleton::getResolver();
 		if (resolver)
 		{
-			// Has the resolver already been connected once?
-			if (!QA400Application::has_augmented_path)
+			for each (String^ _p in resolver->resolvedPaths)
 			{
-				QA400Application::has_augmented_path = true;
-				for each (String^ _p in resolver->resolvedPaths)
-				{
-					QAConnectionManager::AddSearchPath(_p);
-				}
+				QAConnectionManager::AddSearchPath(_p);
 			}
 		}
 
 		// Now try to find the executable
 
-		// Retry for a total of 5 seconds
-		int numretries = 50;
+		// Retry for a total of 10 seconds
+		int numretries = 100;
 		QA400API::LaunchApplicationIfNotRunning();
 		while (!analyzer && numretries > 0)
 		{
@@ -44,6 +36,9 @@ QA400Interface^ QA400Application::getAnalyzer(QA400ApplicationResolver^ resolver
 	return analyzer;
 }
 
+
+/// Class providing access to the custom assembly resolver which can be augmented
+/// with lookup paths to resolve .NET assemblies
 QA400ApplicationResolver^ QA400ApplicationResolverSingleton::getResolver()
 {
 	if (!QA400ApplicationResolverSingleton::resolver)
@@ -52,17 +47,14 @@ QA400ApplicationResolver^ QA400ApplicationResolverSingleton::getResolver()
 		QA400ApplicationResolverSingleton::resolver = gcnew QA400ApplicationResolver();
 		AppDomain^ currentDomain = AppDomain::CurrentDomain;
 		currentDomain->AssemblyResolve += gcnew ResolveEventHandler(QA400ApplicationResolverSingleton::AssemblyResolveEventHandler);
-		// Populate it with some default paths
-		resolver->addToPath("C:\\Program Files\\QuantAsylum\\");
-		resolver->addToPath("C:\\Program Files (x86)\\QuantAsylum\\");
-		resolver->addToPath("D:\\Program Files\\QuantAsylum\\");
-		resolver->addToPath("D:\\Program Files (x86)\\QuantAsylum\\");
-		resolver->addToPath("E:\\Program Files\\QuantAsylum\\");
-		resolver->addToPath("E:\\Program Files (x86)\\QuantAsylum\\");
 	}
 	return resolver;
 }
 
+
+/// Adds the given path to the search path when looking for QAConnectionManager.dll
+/// and QAAnalyzer.exe. If you are using this method, it MUST be called as the
+/// absolute first thing, before *any* other API call.
 void QA400ApplicationResolver::addToPath(String^ path)
 {
 	// Now add the new path to the lookup paths, if it isn't already there
@@ -72,6 +64,8 @@ void QA400ApplicationResolver::addToPath(String^ path)
 	}
 }
 
+
+/// Implementation of the custom assembly resolver event handler
 Assembly^ QA400ApplicationResolverSingleton::AssemblyResolveEventHandler(Object^ sender, ResolveEventArgs^ args)
 {
 	/* Based on code in http://support2.microsoft.com/kb/837908 */
@@ -98,7 +92,7 @@ Assembly^ QA400ApplicationResolverSingleton::AssemblyResolveEventHandler(Object^
 					if (assemblyName->Equals("QAAnalyzer"))
 						suffix = ".exe";
 					String^ strTempAssmbPath = _p + assemblyName + suffix;
-					// Try to load the assembly from the specified path. 					
+					// Try to load the assembly from the specified path
 					MyAssembly = Assembly::LoadFrom(strTempAssmbPath);
 					if (MyAssembly)
 					{
@@ -131,7 +125,35 @@ Assembly^ QA400ApplicationResolverSingleton::AssemblyResolveEventHandler(Object^
 	return nullptr;
 }
 
+
 /// Unmanaged API function bodies (callable from unmanaged C++)
+
+/// ----------------------------------------------------------------
+/// Initializes the API and launches the application if it is
+/// not already running. This should be the first thing you call
+/// (after AddToSearchPath(path), if you are augmenting the search path).
+/// ----------------------------------------------------------------
+bool QA400API::Connect()
+{
+	QA400ApplicationResolver^ resolver = QA400ApplicationResolverSingleton::getResolver();
+	if (resolver)
+	{
+		// Populate it with some default paths
+		resolver->addToPath("C:\\Program Files\\QuantAsylum\\");
+		resolver->addToPath("C:\\Program Files (x86)\\QuantAsylum\\");
+		resolver->addToPath("C:\\Program Files\\QuantAsylum\\QA400\\");
+		resolver->addToPath("C:\\Program Files (x86)\\QuantAsylum\\QA400\\");
+		resolver->addToPath("D:\\Program Files\\QuantAsylum\\");
+		resolver->addToPath("D:\\Program Files (x86)\\QuantAsylum\\");
+		resolver->addToPath("D:\\Program Files\\QuantAsylum\\QA400\\");
+		resolver->addToPath("D:\\Program Files (x86)\\QuantAsylum\\QA400\\");
+		resolver->addToPath("E:\\Program Files\\QuantAsylum\\");
+		resolver->addToPath("E:\\Program Files (x86)\\QuantAsylum\\");
+		resolver->addToPath("E:\\Program Files\\QuantAsylum\\QA400\\");
+		resolver->addToPath("E:\\Program Files (x86)\\QuantAsylum\\QA400\\");
+	}
+	return QA400API::IsConnected();
+}
 
 /// ----------------------------------------------------------------
 void QA400API::LaunchApplicationIfNotRunning()
@@ -141,7 +163,7 @@ void QA400API::LaunchApplicationIfNotRunning()
 }
 
 /// ----------------------------------------------------------------
-bool QA400API::AddToSearchPath(char *path, bool shouldConnect)
+void QA400API::AddToSearchPath(char *path)
 {
 	String^ s = ToManagedString(path);
 	if (!s->EndsWith("\\"))
@@ -150,10 +172,6 @@ bool QA400API::AddToSearchPath(char *path, bool shouldConnect)
 	QA400ApplicationResolver^ resolver = QA400ApplicationResolverSingleton::getResolver();
 	if (resolver)
 		resolver->addToPath(s);
-
-	if (shouldConnect)
-		return QA400API::IsConnected();
-	return false;
 }
 
 /// ----------------------------------------------------------------

@@ -32,22 +32,28 @@ public:
 	/// <summary>
 	/// Adds the given path to the search path when looking for QAConnectionManager.dll
 	/// and QAAnalyzer.exe. If you are using this method, it MUST be called as the
-	/// absolute first thing, before any other API call.
+	/// absolute first thing, before *any* other API call.
 	/// <param name="path">The search path to add</param>
-	/// <param name="shouldConnect">Whether or not to launch the program and connect afterwards</param>
 	/// </summary>
-	/// <returns>true if the analyzer is connected</returns>
-	static bool AddToSearchPath(char *path, bool shouldConnect);
+	/// <returns></returns>
+	static void AddToSearchPath(char *path);
 
 	/// <summary>
-	/// Returns true if the analyzer is connected. Launches the application if it is
-	/// not already running.
+	/// Initializes the API and launches the application if it is
+	/// not already running. This should be the first thing you call
+	/// (after AddToSearchPath(path), if you are augmenting the search path).
 	/// </summary>
-	/// <returns>true if the analyzer is connected</returns>
+	/// <returns>true if the analyzer is connected and functioning</returns>
+	static bool Connect();
+
+	/// <summary>
+	/// Returns true if the hardware is connected and functioning.
+	/// </summary>
+	/// <returns></returns>
 	static bool IsConnected();
 
 	/// <summary>
-	/// Launches the QA400 application if it is not already running. 
+	/// Attempts to launch the QA400 application if it is not already running. 
 	/// </summary>
 	/// <returns></returns>
 	static void LaunchApplicationIfNotRunning();
@@ -85,15 +91,15 @@ public:
 	/// <param name="gen">Generator 1 or 2</param>
 	/// <param name="isOn">Sets on/off state</param>
 	/// <param name="ampl">Sets amplitude</param>
-	/// <param name="freq">Sets frequency. This might be rounded, depending on the host settings</param>
+	/// <param name="freq">Sets frequency. This might be rounded, depending on the host settings.</param>
 	static void SetGenerator(GenType gen, bool isOn, double ampl, double freq);
 
 	/// <summary>
 	/// Generates a constant tone of the specified amplitude, frequency, and duration. The current units are used. 
 	/// </summary>
 	/// <param name="ampl">Sets amplitude</param>
-	/// <param name="freq">Sets frequency. This might be rounded, depending on the host settings</param>
-	/// <param name="durationMS">Sets the duration</param>
+	/// <param name="freq">Sets frequency. This might be rounded, depending on the host settings.</param>
+	/// <param name="durationMS">Sets the duration in milliseconds</param>
 	static void GenerateTone(double ampl, double freq, int durationMS);
 
 	/// <summary>
@@ -107,7 +113,7 @@ public:
 	static void Stop();
 
 	/// <summary>
-	/// This will set the Generator 1 to active, to an amplitude of amp1, and a frequency of freq1 and then a measurement will be made 
+	/// This will set Generator 1 to active, to an amplitude of amp1, and a frequency of freq1 and then a measurement will be made 
 	/// with the new generator settings. A single acquisition will be performed. After the acquisition finishes, the analyzer will 
 	/// automatically stop. The collected data can then be pulled over using the GetData() function. Note that this function only starts 
 	/// the acquisition. The function will return immediately, and then the acquistion state must be polled via GetAcquisitionState() to 
@@ -177,7 +183,7 @@ public:
 	/// <summary>
 	/// Given a previous data acquisition, this will compute the power of the data from the last acquisition.
 	/// </summary>
-	/// <param name="channel">The channel to read the last data from.</param>
+	/// <param name="channel">The channel to read the last data from</param>
 	/// <returns>Computed power in dB</returns>
 	static double ComputePowerDBOnLastData(ChannelType channel);
 
@@ -296,7 +302,7 @@ public:
 	static void SetOffsets(double inputOffsets, double outputOffsets);
 
 	/// <summary>
-	/// Sets the units for data
+	/// Sets the units for data.
 	/// </summary>
 	/// <param name="type">The units type to use</param>
 	static void SetUnits(UnitsType type);

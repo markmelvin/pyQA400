@@ -28,32 +28,35 @@ GEN2        = pyQA400.Gen2
 # --------------------------------------------------------------------------
 def connect_to_analyzer(timeout=10.0):
     """Launches the QA400 software and connects to the analyzer. Returns
-       True on success, or false if the operation times out.
+       True on success, or False if the operation times out. This is the
+       recommended means of launching the application and connecting to
+       the API. If you are augmenting the search path (your QA400 software
+       is installed in a non-standard location), you must call
+       add_to_search_path() first.
        
        timeout - The number of seconds to wait for the device to connect."""
     inittime = time.clock()
-    while not is_connected():
-        if time.clock() > timeout:
-            return False
-        time.sleep(0.2)
+    if not connect():
+        while not is_connected():
+            time.sleep(0.2)
+            if time.clock() > timeout:
+                return False
     return True
 
 # --------------------------------------------------------------------------
 # API functions
 # --------------------------------------------------------------------------
+def add_to_search_path(_path):
+    """Adds the given path to the search path when looking for the
+       QAConnectionManager DLL and QAAnalyzer executable. Must be called
+       before calling connect_to_analyzer() to be effective."""
+    py_byte_string = _path.encode('UTF-8')
+    cdef char* c_string = py_byte_string
+    AddToSearchPath(c_string)
+
 def launch_application_if_not_running():
     """Launches the QA400 application if it is not already running."""
     LaunchApplicationIfNotRunning()
-
-def add_to_search_path(_path, should_connect=False):
-    """Adds the given path to the search path when looking for the QAAnalyzer
-       executable."""
-    py_byte_string = _path.encode('UTF-8')
-    cdef char* c_string = py_byte_string
-    AddToSearchPath(c_string, should_connect)
-    if should_connect:
-        return connect_to_analyzer()
-    return False
 
 def get_name():
     """Returns the friendly name of the host hardware. 
@@ -73,15 +76,19 @@ def get_name():
     finally:
         PyMem_Free(c_string)
 
-def is_connected():
-    """Returns true if the hardware is connected and functioning. It is
-       recommended that you call this as the first thing you do, as it will
-       automatically launch the application and initialize the analyzer.
+def connect():
+    """Initializes the connection and launches the QA400 software.
+
+       Returns true if the hardware is connected and functioning.
        If this returns false, do not attempt to use the analyzer.
 	   You may need to unplug the USB cable and plug it back in again
        before retrying.  It is also recommended that you wait a couple
        seconds for the application to initialize if this is the first
        time you have connected (and the program just launched)."""
+    return Connect()
+
+def is_connected():
+    """Returns true if the hardware is connected and functioning."""
     return IsConnected()
 
 def set_to_default(filename=""):

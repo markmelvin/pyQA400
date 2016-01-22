@@ -67,7 +67,7 @@ def plot(data):
 
 # --------------------------------------------------------------------------
 if __name__ == "__main__":
-    SHOULD_PLOT = False
+    SHOULD_PLOT = True
 
     # Add the dependencies folder to the .NET search path so the 
     # QAConnectionManager.dll can be found
@@ -91,7 +91,7 @@ if __name__ == "__main__":
         sys.exit(1)
 
     initialize_analyzer()
-    data = frequency_response(output_level_dBV=0,
+    data = frequency_response(output_level_dBV=-10,
                               freq_start_hz=20,
                               freq_end_hz=70000,
                               points_per_octave=5,

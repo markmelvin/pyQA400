@@ -1,14 +1,9 @@
 ##!/usr/bin/env python
 # -*- coding: iso-8859-1 -*-
-from __future__ import print_function
-
 import pyQA400
-import utils
 import time
 import sys
 import os
-
-_TOL = 12
 
 def initialize_analyzer():
     # Initialize the units to dBV
@@ -19,43 +14,44 @@ def initialize_analyzer():
     pyQA400.set_generator(pyQA400.GEN2, False, -160, 1000)
     time.sleep(0.5)
 
-def get_peak_power(generator, channel, level, fundamental):
+def compute_THD(generator, channel, level, fundamental, max_freq):
     pyQA400.set_generator(generator, True, level, fundamental)
     pyQA400.run_single()
     while (pyQA400.get_acquisition_state() == pyQA400.BUSY):
         time.sleep(0.01)
-    return pyQA400.compute_power_DB_on_last_data_over_bandwidth(channel, fundamental-_TOL, fundamental+_TOL)
+    return pyQA400.compute_THD_percent_on_last_data(channel, fundamental, max_freq)
 
-def input_versus_output(start_dBV, end_dBV, step_dBV,
-                        frequency_hz=1000,
-                        generator=pyQA400.GEN1,
-                        input_channel=pyQA400.LEFTIN):
-
-    # Create a list of levels to sweep across
-    test_levels = utils.linspace(start_dBV, end_dBV, step=step_dBV)
+def THD_versus_output_level(output_level_dBV=-10, freq_start_hz=20,
+                            freq_end_hz=20000, points_per_octave=5,
+                            generator=pyQA400.GEN1,
+                            input_channel=pyQA400.LEFTIN):
+    # Create a list of frequencies to test
+    test_freqs = []
+    f = freq_start_hz
+    while f <= freq_end_hz:
+        test_freqs += [w for w in range(f, f*10, int((f*10 - f) / points_per_octave)) if w <= freq_end_hz]
+        f = f*10
 
     results = []
-    for level in test_levels:
-        power_dbv = get_peak_power(generator, input_channel, level, frequency_hz)
-        print(level, power_dbv)
-        results.append( (level, power_dbv) )
+    for freq in test_freqs:
+        results.append((freq, compute_THD(generator, input_channel, output_level_dBV, freq, 2*freq_end_hz)))
     return results
 
 def plot(data):
     x_data = [w[0] for w in data]
     y_data = [w[1] for w in data]
-    win = pg.GraphicsWindow(title="Input versus Output")
+    win = pg.GraphicsWindow(title="THD vs Output Level")
 
     # Enable antialiasing for prettier plots
     pg.setConfigOptions(antialias=True)
 
-    p1 = win.addPlot(title="Input versus Output")
-    p1.setLogMode(False, False)
+    p1 = win.addPlot(title="THD vs Output Level")
+    p1.setLogMode(True, False)
     p1.plot(x_data, y_data)
 
 # --------------------------------------------------------------------------
 if __name__ == "__main__":
-    SHOULD_PLOT = True
+    SHOULD_PLOT = False
 
     # Add the dependencies folder to the .NET search path so the 
     # QAConnectionManager.dll can be found
@@ -79,9 +75,7 @@ if __name__ == "__main__":
         sys.exit(1)
 
     initialize_analyzer()
-    data = input_versus_output(-60, -8, 1,
-                               generator=pyQA400.GEN1,
-                               input_channel=pyQA400.LEFTIN)
+    data = THD_versus_output_level(freq_start_hz=100, points_per_octave=10)
     if SHOULD_PLOT:
         import pyqtgraph as pg
         plot(data)

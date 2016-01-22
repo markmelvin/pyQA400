@@ -1,14 +1,11 @@
 ##!/usr/bin/env python
 # -*- coding: iso-8859-1 -*-
-from __future__ import print_function
-
 import pyQA400
 import utils
 import time
 import sys
+import math
 import os
-
-_TOL = 12
 
 def initialize_analyzer():
     # Initialize the units to dBV
@@ -19,39 +16,25 @@ def initialize_analyzer():
     pyQA400.set_generator(pyQA400.GEN2, False, -160, 1000)
     time.sleep(0.5)
 
-def get_peak_power(generator, channel, level, fundamental):
-    pyQA400.set_generator(generator, True, level, fundamental)
-    pyQA400.run_single()
-    while (pyQA400.get_acquisition_state() == pyQA400.BUSY):
-        time.sleep(0.01)
-    return pyQA400.compute_power_DB_on_last_data_over_bandwidth(channel, fundamental-_TOL, fundamental+_TOL)
-
-def input_versus_output(start_dBV, end_dBV, step_dBV,
-                        frequency_hz=1000,
-                        generator=pyQA400.GEN1,
-                        input_channel=pyQA400.LEFTIN):
-
-    # Create a list of levels to sweep across
-    test_levels = utils.linspace(start_dBV, end_dBV, step=step_dBV)
-
-    results = []
-    for level in test_levels:
-        power_dbv = get_peak_power(generator, input_channel, level, frequency_hz)
-        print(level, power_dbv)
-        results.append( (level, power_dbv) )
-    return results
+def measure_noise_floor(input_channel=pyQA400.LEFTIN):
+    pyQA400.run()
+    time.sleep(10.0)
+    pyQA400.stop()
+    return pyQA400.get_data(input_channel)
 
 def plot(data):
     x_data = [w[0] for w in data]
-    y_data = [w[1] for w in data]
-    win = pg.GraphicsWindow(title="Input versus Output")
+    y_data = [20*math.log10(w[1]) for w in data]
+    win = pg.GraphicsWindow(title="FFT of Noise Floor")
 
     # Enable antialiasing for prettier plots
     pg.setConfigOptions(antialias=True)
 
-    p1 = win.addPlot(title="Input versus Output")
-    p1.setLogMode(False, False)
+    p1 = win.addPlot(title="FFT of Noise Floor")
+    p1.setLogMode(True, False)
     p1.plot(x_data, y_data)
+    x_axis = p1.getAxis("bottom")
+    x_axis.setRange(0, 5)
 
 # --------------------------------------------------------------------------
 if __name__ == "__main__":
@@ -79,12 +62,10 @@ if __name__ == "__main__":
         sys.exit(1)
 
     initialize_analyzer()
-    data = input_versus_output(-60, -8, 1,
-                               generator=pyQA400.GEN1,
-                               input_channel=pyQA400.LEFTIN)
+    data = measure_noise_floor(input_channel=pyQA400.RIGHTIN)
     if SHOULD_PLOT:
         import pyqtgraph as pg
         plot(data)
         pg.QtGui.QApplication.exec_()
     else:
-        print(data)
+        print([w[0] for w in data])

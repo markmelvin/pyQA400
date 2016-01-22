@@ -8,17 +8,15 @@ import sys
 import os
 import utils
 
-def test():
-    print(pyQA400.get_name())
-    print("Connecting...")
+def test(pathname):
+    pyQA400.set_units(pyQA400.DBV)
 
     # Turn off both generators
     pyQA400.set_generator(pyQA400.GEN1, False, -110, 1000)
     pyQA400.set_generator(pyQA400.GEN2, False, -110, 1000)
     time.sleep(0.5)
 
-    #FREQS = utils.get_frequency_list(1000, 8000, freq_step=1000)
-    FREQS=[]
+    FREQS = utils.get_frequency_list(1000, 8000, freq_step=1000)
     MIN_FREQ = 20
     MAX_FREQ = 20000
     AMPLITUDE = -20
@@ -76,8 +74,10 @@ if __name__ == "__main__":
 
     # Also add the location of the QAAnalyzer.exe executable (NOTE: This is only
     # required if your analyzer software is installed in a non-default location)
-    if not pyQA400.add_to_search_path("I:\\Programs\\QuantAsylum\\QA400", True):
+    pyQA400.add_to_search_path("I:\\Programs\\QuantAsylum\\QA400")
+
+    if not pyQA400.connect_to_analyzer():
         print("Can't find the analyzer. Exiting.")
         sys.exit(1)
 
-    test()
+    test(this_pathname)

@@ -141,7 +141,7 @@ to do is the following:
 - Put the following files all in the same folder somewhere:
 
     <your_python_script>.py
-    pyQA400.pyd 
+    pyQA400.pyd (or pyQA400.cp35-win32)
     QA400API.dll
     QAConnectionManager.dll
 

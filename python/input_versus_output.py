@@ -55,7 +55,7 @@ def plot(data):
 
 # --------------------------------------------------------------------------
 if __name__ == "__main__":
-    SHOULD_PLOT = True
+    SHOULD_PLOT = False
 
     # Add the dependencies folder to the .NET search path so the 
     # QAConnectionManager.dll can be found

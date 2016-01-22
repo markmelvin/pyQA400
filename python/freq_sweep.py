@@ -30,7 +30,7 @@ def frequency_sweep(output_level_dBV=-10, freq_start_hz=10,
         print("Outputting %f Hz" % freq)
         pyQA400.set_generator(generator, True, output_level_dBV, freq)
         pyQA400.run()
-        time.sleep(2.0)
+        time.sleep(1.0)
         pyQA400.stop()
 
     return results

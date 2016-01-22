@@ -31,6 +31,10 @@ if __name__ == "__main__":
     # locally)
     pyQA400.add_to_search_path(this_pathname)
 
+    # Also add the location of the QAAnalyzer.exe executable (NOTE: This is only
+    # required if your analyzer software is installed in a non-default location)
+    pyQA400.add_to_search_path("I:\\Programs\\QuantAsylum\\QA400")
+
     if not pyQA400.connect_to_analyzer():
         print("Can't find the analyzer. Exiting.")
         sys.exit(1)

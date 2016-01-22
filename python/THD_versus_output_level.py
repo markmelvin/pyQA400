@@ -1,5 +1,7 @@
 ##!/usr/bin/env python
 # -*- coding: iso-8859-1 -*-
+from __future__ import print_function
+
 import pyQA400
 import time
 import sys
@@ -15,6 +17,7 @@ def initialize_analyzer():
     time.sleep(0.5)
 
 def compute_THD(generator, channel, level, fundamental, max_freq):
+    print(level, fundamental, max_freq)
     pyQA400.set_generator(generator, True, level, fundamental)
     pyQA400.run_single()
     while (pyQA400.get_acquisition_state() == pyQA400.BUSY):
@@ -22,7 +25,7 @@ def compute_THD(generator, channel, level, fundamental, max_freq):
     return pyQA400.compute_THD_percent_on_last_data(channel, fundamental, max_freq)
 
 def THD_versus_output_level(output_level_dBV=-10, freq_start_hz=20,
-                            freq_end_hz=20000, points_per_octave=5,
+                            freq_end_hz=10000, points_per_octave=5,
                             generator=pyQA400.GEN1,
                             input_channel=pyQA400.LEFTIN):
     # Create a list of frequencies to test
